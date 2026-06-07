@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import { Listing } from "../models/Listing.js";
 import { sampleListings } from "./initData.js";
 
-dotenv.config();
+dotenv.config({ path: "../.env" });
 
 const MONGO_URL = process.env.MONGO_URL;
 
@@ -23,3 +23,5 @@ const initDB = async () => {
     console.log(error);
   }
 };
+
+initDB();

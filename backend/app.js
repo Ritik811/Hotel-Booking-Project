@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import cors from "cors";
 import { userRouter } from "./routes/userRoute.js";
+import { listingRouter } from "./routes/listingRoute.js";
 
 dotenv.config();
 const app = express();
@@ -21,7 +22,8 @@ const databaseConnected = async () => {
 };
 databaseConnected();
 
-app.use("/listing", userRouter);
+app.use("/auth", userRouter);
+app.use("/listings", listingRouter);
 
 app.get("/", (req, res) => {
   res.send("Start Project");

@@ -1,15 +1,23 @@
 import React from "react";
 import { Card, CardMedia, CardContent, Typography, Box } from "@mui/material";
+import { useNavigate } from "react-router-dom"; // 🎯 1. Router ka navigation tool import kiya
 
 function ListingCard({ listing }) {
+  const navigate = useNavigate();
+  const id = listing._id || 123;
+  const handleCardClick = () => {
+    navigate(`/listings/${id}`);
+  };
+
   return (
     <Card
+      onClick={handleCardClick} // 🎯 4. Pure card par click listener fit kar diya
       sx={{
-        width: "100%", // 🎯 Card apni Grid item ki poori width lega
+        width: "100%",
         borderRadius: "12px",
         boxShadow: "none",
         cursor: "pointer",
-        backgroundColor: "transparent", // Airbnb look ke liye background transparent
+        backgroundColor: "transparent",
         "&:hover .MuiCardMedia-root": { transform: "scale(1.03)" },
       }}
     >
@@ -21,34 +29,33 @@ function ListingCard({ listing }) {
           aspectRatio: "20 / 19",
         }}
       >
-        {/* 🎯 aspectRatio lagane se saare image box ekdum exact same square/rectangle size ke banenge */}
         <CardMedia
           component="img"
           image={
-            listing.image[0] ||
+            (listing.image && listing.image[0]) ||
             listing.image ||
             "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688"
           }
-          alt={listing.title}
+          alt={listing.title || "Listing Image"}
           sx={{
             height: "100%",
             width: "100%",
-            objectFit: "cover", // 🎯 Isse photo stretch (kich) nahi hogi, ekdum perfect crop hokar fit hogi
+            objectFit: "cover",
             transition: "transform 0.3s ease-in-out",
           }}
         />
       </Box>
 
-      {/* Details (Baaki code bilkul same rahega) */}
+      {/* Details */}
       <CardContent sx={{ padding: "12px 4px" }}>
         <Typography
           variant="body1"
           sx={{ fontWeight: "bold", color: "#222222", noWrap: true }}
         >
-          {listing.location}, {listing.country}
+          {listing.location || "Location"}, {listing.country || "Country"}
         </Typography>
         <Typography variant="body2" sx={{ color: "#717171", margin: "4px 0" }}>
-          {listing.category}
+          {listing.category || "Property"}
         </Typography>
         <Typography
           variant="body1"

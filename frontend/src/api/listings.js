@@ -13,3 +13,13 @@ export const getAllListings = async () => {
     throw error;
   }
 };
+
+export const getListingDetails = async (id) => {
+  try {
+    const res = await apiClient.get(`listings/${id}`);
+    console.log("details", res.data);
+    return res.data;
+  } catch (error) {
+    console.log("Internal Issue");
+  }
+};

@@ -1,15 +1,27 @@
-import Footer from "./components/Footer";
-import Navbar from "./components/Navbar";
+import { AppLayout } from "./Layout/AppLayout";
 import LandingPage from "./pages/LandingPage";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { ListingDetailPage } from "./pages/ListingDetailPage";
 
 const App = () => {
-  return (
-    <>
-      <Navbar />
-      <LandingPage />
-      <Footer />
-    </>
-  );
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <AppLayout />,
+      children: [
+        {
+          index: true,
+          element: <LandingPage />,
+        },
+        {
+          path: "listings/:id",
+          element: <ListingDetailPage />,
+        },
+      ],
+    },
+  ]);
+
+  return <RouterProvider router={router} />;
 };
 
 export default App;

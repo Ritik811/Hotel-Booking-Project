@@ -1,5 +1,4 @@
 export const sampleListings = [
-  // ... tumhare pehle wale 3 items ...
   {
     title: "Cozy Beachfront Resort",
 

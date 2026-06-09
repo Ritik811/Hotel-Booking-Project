@@ -23,3 +23,13 @@ export const getListingDetails = async (id) => {
     console.log("Internal Issue");
   }
 };
+
+export const createListing = async (formData) => {
+  try {
+    const res = await apiClient.post("listings", formData);
+    console.log(res.data);
+    return res.data;;
+  } catch (error) {
+    console.log("Error", error.message);
+  }
+};

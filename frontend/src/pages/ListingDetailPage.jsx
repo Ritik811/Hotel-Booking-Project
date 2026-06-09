@@ -13,6 +13,8 @@ import WifiIcon from "@mui/icons-material/Wifi";
 import PoolIcon from "@mui/icons-material/Pool";
 import TvIcon from "@mui/icons-material/Tv";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
+import EditIcon from "@mui/icons-material/Edit"; // 🎯 UI Icons import kiye
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useParams } from "react-router-dom";
 import { getListingDetails } from "../api/listings";
 
@@ -31,7 +33,7 @@ export const ListingDetailPage = () => {
       }
     };
     if (id) fetchListing();
-  }, [id]); // 🎯 Added id to dependency array
+  }, [id]);
 
   const dummyListing = {
     title: "Luxury Beachside Villa with Private Pool",
@@ -92,7 +94,7 @@ export const ListingDetailPage = () => {
         </Box>
       </Box>
 
-      {/* 🖼️ SECTION 2: Image Banner (Array First Element Safe Handling) */}
+      {/* 🖼️ SECTION 2: Image Banner */}
       <Box
         component="img"
         src={(listing.image && listing.image[0]) || dummyListing.image[0]}
@@ -114,7 +116,7 @@ export const ListingDetailPage = () => {
           gap: "64px",
         }}
       >
-        {/* ⬅️ LEFT SIDE: Description & Amenities */}
+        {/* ⬅️ LEFT SIDE: Description, Amenities & Admin Buttons */}
         <Box>
           {/* Host Info */}
           <Box
@@ -206,6 +208,57 @@ export const ListingDetailPage = () => {
               <TvIcon sx={{ color: "#717171" }} />
               <Typography variant="body1">HDTV with Netflix</Typography>
             </Box>
+          </Box>
+
+          <Divider sx={{ margin: "32px 0" }} />
+
+          {/* 🎯 UI ONLY: EDIT & DELETE BUTTONS AREA */}
+          <Box
+            sx={{
+              display: "flex",
+              gap: "16px",
+              marginTop: "24px",
+            }}
+          >
+            {/* Edit Button UI */}
+            <Button
+              variant="outlined"
+              startIcon={<EditIcon />}
+              sx={{
+                borderColor: "#1976d2",
+                color: "#1976d2",
+                textTransform: "none",
+                fontWeight: "600",
+                padding: "8px 24px",
+                borderRadius: "8px",
+                "&:hover": {
+                  borderColor: "#115293",
+                  backgroundColor: "rgba(25, 118, 210, 0.04)",
+                },
+              }}
+            >
+              Edit Listing
+            </Button>
+
+            {/* Delete Button UI */}
+            <Button
+              variant="outlined"
+              startIcon={<DeleteIcon />}
+              sx={{
+                borderColor: "#d32f2f",
+                color: "#d32f2f",
+                textTransform: "none",
+                fontWeight: "600",
+                padding: "8px 24px",
+                borderRadius: "8px",
+                "&:hover": {
+                  borderColor: "#9a0007",
+                  backgroundColor: "rgba(211, 47, 47, 0.04)",
+                },
+              }}
+            >
+              Delete Listing
+            </Button>
           </Box>
         </Box>
 

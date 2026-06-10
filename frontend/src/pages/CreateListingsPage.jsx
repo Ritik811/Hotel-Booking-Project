@@ -16,6 +16,13 @@ import { createListing } from "../api/listings";
 import { useNavigate } from "react-router-dom";
 
 export const CreateListingPage = () => {
+  const navigate = useNavigate();
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+
+  // 🚀 1. Errors State setup kiya frontend feedback ke liye
+  const [errors, setErrors] = useState({});
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -26,9 +33,37 @@ export const CreateListingPage = () => {
     country: "",
   });
 
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
+  // 🚀 2. Solid Validation Guard Function
+  const validateForm = () => {
+    let tempErrors = {};
+
+    if (!formData.title.trim()) {
+      tempErrors.title = "Property title is required!";
+    }
+
+    if (!formData.description.trim()) {
+      tempErrors.description = "Description is required!";
+    }
+
+    if (!formData.country.trim()) {
+      tempErrors.country = "Country name is required!";
+    }
+
+    if (!formData.price || formData.price <= 0) {
+      tempErrors.price = "Price must be a positive number!";
+    }
+
+    if (!formData.location.trim()) {
+      tempErrors.location = "Location is required!";
+    }
+
+    if (!formData.image.trim()) {
+      tempErrors.image = "Image URL is required!";
+    }
+
+    setErrors(tempErrors);
+    return Object.keys(tempErrors).length === 0;
+  };
 
   const handleFormData = (evt) => {
     let { name, value } = evt.target;
@@ -43,6 +78,9 @@ export const CreateListingPage = () => {
     setSuccess("");
     setError("");
 
+    // 🚀 3. Agar ticket nahi hai (validation fail), toh return ho jao!
+    if (!validateForm()) return;
+
     const dataToSend = {
       ...formData,
       image: [formData.image],
@@ -52,9 +90,10 @@ export const CreateListingPage = () => {
       const res = await createListing(dataToSend);
       console.log("Form res", res);
       navigate("/");
-      return setSuccess("Success");
+      setSuccess("Success");
     } catch (error) {
-      return setError(error);
+      console.log("Frontend Error", error);
+      setError(error.message || "Something went wrong");
     }
   };
 
@@ -93,7 +132,10 @@ export const CreateListingPage = () => {
                 placeholder="e.g., Cozy Beachside Paradise"
                 variant="outlined"
                 name="title"
+                value={formData.title} // 🔥 Controlled input structure
                 onChange={handleFormData}
+                error={!!errors.title}
+                helperText={errors.title}
               />
             </Grid>
 
@@ -107,11 +149,14 @@ export const CreateListingPage = () => {
                 placeholder="Describe your space, amenities, and nearby attractions..."
                 variant="outlined"
                 name="description"
+                value={formData.description} // 🔥 Controlled input structure
                 onChange={handleFormData}
+                error={!!errors.description}
+                helperText={errors.description}
               />
             </Grid>
 
-            {/* 3. Category (Schema Enum Rules: Hotel, Villa, Resort, Apartment) */}
+            {/* 3. Category */}
             <Grid xs={12} sm={6}>
               <FormControl fullWidth>
                 <InputLabel id="category-label">Category</InputLabel>
@@ -119,8 +164,8 @@ export const CreateListingPage = () => {
                   labelId="category-label"
                   id="category-select"
                   label="Category"
-                  defaultValue="Hotel"
                   name="category"
+                  value={formData.category} // 🔥 Controlled dropdown structure
                   onChange={handleFormData}
                 >
                   <MenuItem value="Hotel">Hotel</MenuItem>
@@ -140,21 +185,30 @@ export const CreateListingPage = () => {
                 placeholder="e.g., 2500"
                 variant="outlined"
                 name="price"
+                value={formData.price} // 🔥 Controlled input structure
                 onChange={handleFormData}
-                slotProps={{ htmlInput: { min: 0 } }} // Schema min: 0 validation check
+                error={!!errors.price}
+                helperText={errors.price}
+                slotProps={{ htmlInput: { min: 0 } }}
               />
             </Grid>
 
-            {/* 5. Image URL (Schema takes an Array of Strings) */}
+            {/* 5. Image URL */}
             <Grid xs={12}>
               <TextField
                 fullWidth
                 label="Image URL"
                 placeholder="https://images.unsplash.com/..."
                 variant="outlined"
-                helperText="Paste a secure link of your property image"
+                helperText={
+                  errors.image
+                    ? errors.image
+                    : "Paste a secure link of your property image"
+                }
                 name="image"
+                value={formData.image} // 🔥 Controlled input structure
                 onChange={handleFormData}
+                error={!!errors.image}
               />
             </Grid>
 
@@ -166,7 +220,10 @@ export const CreateListingPage = () => {
                 placeholder="e.g., Calangute, Goa"
                 variant="outlined"
                 name="location"
+                value={formData.location} // 🔥 Controlled input structure
                 onChange={handleFormData}
+                error={!!errors.location}
+                helperText={errors.location}
               />
             </Grid>
 
@@ -178,7 +235,10 @@ export const CreateListingPage = () => {
                 placeholder="e.g., India"
                 variant="outlined"
                 name="country"
+                value={formData.country} // 🔥 Controlled input structure
                 onChange={handleFormData}
+                error={!!errors.country}
+                helperText={errors.country}
               />
             </Grid>
 
@@ -189,7 +249,7 @@ export const CreateListingPage = () => {
                 variant="contained"
                 fullWidth
                 sx={{
-                  backgroundColor: "#FF385C", // Airbnb style pinkish-red
+                  backgroundColor: "#FF385C",
                   color: "#fff",
                   padding: "14px",
                   borderRadius: "8px",

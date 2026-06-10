@@ -29,6 +29,9 @@ import { getListingDetails, updateListing } from "../api/listings";
 export const ListingEditPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [errors, setErrors] = useState({});
+
+  // 🚀 1. State hamesha functions se upar honi chahiye
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -39,6 +42,34 @@ export const ListingEditPage = () => {
     country: "",
   });
 
+  // Check Form Validation
+  const validateForm = () => {
+    let tempErrors = {};
+
+    if (!formData.title.trim()) {
+      tempErrors.title = "Property title is required!";
+    }
+
+    if (!formData.description.trim()) {
+      tempErrors.description = "Description is required!";
+    }
+
+    if (!formData.country.trim()) {
+      tempErrors.country = "Country name is required!";
+    }
+
+    if (!formData.price || formData.price <= 0) {
+      tempErrors.price = "Price must be a positive number!";
+    }
+
+    if (!formData.location.trim()) {
+      tempErrors.location = "Location is required!";
+    }
+
+    setErrors(tempErrors);
+    return Object.keys(tempErrors).length === 0;
+  };
+
   const handleChange = (evt) => {
     const { name, value } = evt.target;
     setFormData({ ...formData, [name]: value });
@@ -46,14 +77,13 @@ export const ListingEditPage = () => {
 
   const handleSubmit = async (evt) => {
     evt.preventDefault();
+    if (!validateForm()) return;
     try {
-      const res = await updateListing(id, formData);
+      await updateListing(id, formData);
       console.log("Success Updated");
       navigate(-1);
-      return;
     } catch (error) {
       console.log("Frontend Error", error);
-      throw error;
     }
   };
 
@@ -61,9 +91,15 @@ export const ListingEditPage = () => {
     const getExistingData = async () => {
       try {
         const res = await getListingDetails(id);
-        setFormData(res.data);
-        console.log("setFormData", res);
-        return res;
+        setFormData({
+          title: res.data.title || "",
+          description: res.data.description || "",
+          image: res.data.image || "",
+          category: res.data.category || "Hotel",
+          price: res.data.price || "",
+          location: res.data.location || "",
+          country: res.data.country || "",
+        });
       } catch (error) {
         console.log("Frontend Error", error);
       }
@@ -73,9 +109,10 @@ export const ListingEditPage = () => {
 
   return (
     <Container maxWidth="md" sx={{ marginTop: "40px", marginBottom: "60px" }}>
-      {/* 🔙 Back Button Design */}
+      {/* 🔙 Back Button Design Fixed */}
       <Button
         startIcon={<ArrowBackIcon />}
+        onClick={() => navigate(-1)} // 🔥 FIX: Functional banaya ise
         sx={{
           color: "#717171",
           textTransform: "none",
@@ -110,9 +147,8 @@ export const ListingEditPage = () => {
 
         {/* Form Container */}
         <Box component="form" onSubmit={handleSubmit}>
-          {/* Main Container */}
           <Grid container spacing={3}>
-            {/* 1. Title (🔥 Fix: item prop removed) */}
+            {/* 1. Title */}
             <Grid xs={12}>
               <TextField
                 fullWidth
@@ -122,6 +158,8 @@ export const ListingEditPage = () => {
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
+                error={!!errors.title}
+                helperText={errors.title}
                 slotProps={{
                   inputLabel: { shrink: true },
                   input: {
@@ -137,18 +175,20 @@ export const ListingEditPage = () => {
               />
             </Grid>
 
-            {/* 2. Description (🔥 Fix: item prop removed) */}
+            {/* 2. Description */}
             <Grid xs={12}>
               <TextField
                 fullWidth
                 multiline
                 rows={4}
                 label="Description"
-                placeholder="Describe your space, amenities, and nearby attractions..."
+                placeholder="Describe your space..."
                 variant="outlined"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
+                error={!!errors.description}
+                helperText={errors.description}
                 slotProps={{
                   inputLabel: { shrink: true },
                   input: {
@@ -167,7 +207,7 @@ export const ListingEditPage = () => {
               />
             </Grid>
 
-            {/* 3. Category (🔥 Fix: item prop removed) */}
+            {/* 3. Category */}
             <Grid xs={12} sm={6}>
               <FormControl fullWidth>
                 <InputLabel id="category-label" shrink>
@@ -178,7 +218,6 @@ export const ListingEditPage = () => {
                   id="category-select"
                   label="Category"
                   name="category"
-                  defaultValue=""
                   value={formData.category}
                   onChange={handleChange}
                   notched
@@ -198,7 +237,7 @@ export const ListingEditPage = () => {
               </FormControl>
             </Grid>
 
-            {/* 4. Price per Night (🔥 Fix: item prop removed) */}
+            {/* 4. Price per Night */}
             <Grid xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -209,6 +248,8 @@ export const ListingEditPage = () => {
                 name="price"
                 value={formData.price}
                 onChange={handleChange}
+                error={!!errors.price}
+                helperText={errors.price}
                 slotProps={{
                   htmlInput: { min: 0 },
                   inputLabel: { shrink: true },
@@ -225,7 +266,7 @@ export const ListingEditPage = () => {
               />
             </Grid>
 
-            {/* 5. Image URL (🔥 Fix: item prop removed) */}
+            {/* 5. Image URL */}
             <Grid xs={12}>
               <TextField
                 fullWidth
@@ -251,7 +292,7 @@ export const ListingEditPage = () => {
               />
             </Grid>
 
-            {/* 6. Location (🔥 Fix: item prop removed) */}
+            {/* 6. Location */}
             <Grid xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -261,6 +302,8 @@ export const ListingEditPage = () => {
                 name="location"
                 onChange={handleChange}
                 value={formData.location}
+                error={!!errors.location} // 🔥 FIX: !! dynamic boolean banaya
+                helperText={errors.location}
                 slotProps={{
                   inputLabel: { shrink: true },
                   input: {
@@ -276,7 +319,7 @@ export const ListingEditPage = () => {
               />
             </Grid>
 
-            {/* 7. Country (🔥 Fix: item prop removed) */}
+            {/* 7. Country */}
             <Grid xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -286,6 +329,8 @@ export const ListingEditPage = () => {
                 name="country"
                 value={formData.country}
                 onChange={handleChange}
+                error={!!errors.country} // 🔥 FIX: !! dynamic boolean banaya
+                helperText={errors.country}
                 slotProps={{
                   inputLabel: { shrink: true },
                   input: {
@@ -301,21 +346,21 @@ export const ListingEditPage = () => {
               />
             </Grid>
 
-            {/* 🎯 ACTION BUTTONS PANEL (🔥 Fix: item prop removed) */}
-            {/* 🎯 NEW PREMIUM ACTION BUTTONS PANEL */}
+            {/* ACTION BUTTONS PANEL */}
             <Grid xs={12} sx={{ marginTop: "24px" }}>
               <Box
                 sx={{
                   display: "flex",
                   gap: "16px",
-                  justifyContent: "flex-end", // Buttons ko right side me align kiya professional look ke liye
-                  flexDirection: { xs: "column-reverse", sm: "row" }, // Mobile par cancel niche, save upar aayega automatic
+                  justifyContent: "flex-end",
+                  flexDirection: { xs: "column-reverse", sm: "row" },
                 }}
               >
                 {/* ❌ Sleek Cancel Button */}
                 <Button
                   variant="text"
                   startIcon={<CloseIcon />}
+                  onClick={() => navigate(-1)}
                   sx={{
                     color: "#222222",
                     padding: "12px 24px",
@@ -323,9 +368,7 @@ export const ListingEditPage = () => {
                     fontWeight: "600",
                     fontSize: "15px",
                     textTransform: "none",
-                    "&:hover": {
-                      backgroundColor: "#f7f7f7",
-                    },
+                    "&:hover": { backgroundColor: "#f7f7f7" },
                   }}
                 >
                   Cancel
@@ -338,7 +381,7 @@ export const ListingEditPage = () => {
                   startIcon={<SaveIcon />}
                   sx={{
                     background:
-                      "linear-gradient(to right, #E61E4D 0%, #E31C5F 50%, #D70466 100%)", // Authentic Airbnb Gradient
+                      "linear-gradient(to right, #E61E4D 0%, #E31C5F 50%, #D70466 100%)",
                     color: "#ffffff",
                     padding: "12px 32px",
                     borderRadius: "8px",
@@ -347,12 +390,8 @@ export const ListingEditPage = () => {
                     textTransform: "none",
                     boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
                     transition: "box-shadow 0.2s ease, transform 0.1s ease",
-                    "&:hover": {
-                      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-                    },
-                    "&:active": {
-                      transform: "scale(0.98)", // Click karne par halka sa press effect
-                    },
+                    "&:hover": { boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)" },
+                    "&:active": { transform: "scale(0.98)" },
                   }}
                 >
                   Save Changes

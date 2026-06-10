@@ -237,7 +237,7 @@ export const ListingDetailPage = () => {
             <Button
               variant="outlined"
               startIcon={<EditIcon />}
-              onClick={() => navigate(`/listings/${id}`)}
+              onClick={() => navigate(`/listings/edit/${id}`)}
               sx={{
                 borderColor: "#1976d2",
                 color: "#1976d2",

@@ -15,12 +15,13 @@ import TvIcon from "@mui/icons-material/Tv";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
 import EditIcon from "@mui/icons-material/Edit"; // 🎯 UI Icons import kiye
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useParams } from "react-router-dom";
-import { getListingDetails } from "../api/listings";
+import { useNavigate, useParams } from "react-router-dom";
+import { deleteListing, getListingDetails } from "../api/listings";
 
 export const ListingDetailPage = () => {
   const [listing, setListing] = useState({});
   const { id } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -34,6 +35,18 @@ export const ListingDetailPage = () => {
     };
     if (id) fetchListing();
   }, [id]);
+
+  const handleDeleteButton = async () => {
+    try {
+      const deleteData = await deleteListing(id);
+      navigate("/");
+      console.log("delete data", deleteData);
+      return deleteData;
+    } catch (error) {
+      console.log("Frontend Error", error);
+      alert("Listing delete nahi ho payi, please dubara try karein!");
+    }
+  };
 
   const dummyListing = {
     title: "Luxury Beachside Villa with Private Pool",
@@ -224,6 +237,7 @@ export const ListingDetailPage = () => {
             <Button
               variant="outlined"
               startIcon={<EditIcon />}
+              onClick={() => navigate(`/listings/${id}`)}
               sx={{
                 borderColor: "#1976d2",
                 color: "#1976d2",
@@ -244,6 +258,7 @@ export const ListingDetailPage = () => {
             <Button
               variant="outlined"
               startIcon={<DeleteIcon />}
+              onClick={handleDeleteButton}
               sx={{
                 borderColor: "#d32f2f",
                 color: "#d32f2f",

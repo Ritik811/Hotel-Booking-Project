@@ -2,7 +2,8 @@ import { AppLayout } from "./Layout/AppLayout";
 import LandingPage from "./pages/LandingPage";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ListingDetailPage } from "./pages/ListingDetailPage";
-import { CreateListingPage } from "./components/CreateListings";
+import { CreateListingPage } from "./pages/CreateListingsPage";
+import { ListingEditPage } from "./pages/ListingEditPage";
 
 const App = () => {
   const router = createBrowserRouter([
@@ -17,6 +18,10 @@ const App = () => {
         {
           path: "listings/new",
           element: <CreateListingPage />,
+        },
+        {
+          path: "listings/edit/:id",
+          element: <ListingEditPage />,
         },
         {
           path: "listings/:id",

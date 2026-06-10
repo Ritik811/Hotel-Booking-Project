@@ -78,7 +78,6 @@ export const CreateListingPage = () => {
     setSuccess("");
     setError("");
 
-    // 🚀 3. Agar ticket nahi hai (validation fail), toh return ho jao!
     if (!validateForm()) return;
 
     const dataToSend = {

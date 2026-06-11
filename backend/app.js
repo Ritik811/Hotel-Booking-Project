@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import { userRouter } from "./routes/userRoute.js";
 import { listingRouter } from "./routes/listingRoute.js";
+import { INTERNAL_SERVER_ERROR, StatusCodes } from "http-status-codes";
 
 dotenv.config();
 const app = express();
@@ -27,6 +28,19 @@ app.use("/listings", listingRouter);
 
 app.get("/", (req, res) => {
   res.send("Start Project");
+});
+
+app.use((err, req, res, next) => {
+  console.log("Central Error Log:", err);
+
+  const statusCode = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
+
+  const message = err.message || "Something went wrong on the server!";
+
+  return res.status(statusCode).json({
+    success: false,
+    message: message,
+  });
 });
 
 const PORT = process.env.PORT || 8000;

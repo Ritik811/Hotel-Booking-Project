@@ -1,138 +1,109 @@
 import { Listing } from "../models/Listing.js";
 import { StatusCodes } from "http-status-codes";
+import { wrapAsync } from "../utils/wrapAsync.js";
 
-export const getAllListings = async (req, res) => {
-  try {
-    const data = await Listing.find({});
+// 1. GET ALL LISTINGS
+export const getAllListings = wrapAsync(async (req, res) => {
+  const data = await Listing.find({});
+  return res
+    .status(StatusCodes.OK)
+    .json({ success: true, message: "Data fetched successfully", data });
+});
+
+// 2. CREATE NEW LISTING
+export const createListings = wrapAsync(async (req, res) => {
+  const { title, description, image, category, price, location, country } =
+    req.body;
+
+  if (!title || !description || !category || !price || !location || !country) {
     return res
-      .status(StatusCodes.OK)
-      .json({ success: true, message: "data is find", data });
-  } catch (error) {
-    console.log(error);
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: "Internal issue" });
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: "Bhai saheb, saari fields bharna zaroori hai!" });
   }
-};
 
-export const createListings = async (req, res) => {
-  try {
-    const { title, description, image, category, price, location, country } =
-      req.body;
-    if (
-      !title ||
-      !description ||
-      !category ||
-      !price ||
-      !location ||
-      !country
-    ) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Bhai saheb, saari fields bharna zaroori hai!" });
-    }
-    let data = {
-      title,
-      description,
-      image,
-      category,
-      price,
-      location,
-      country,
-    };
-    const response = await Listing.create(data);
-    console.log(response);
-    return res
-      .status(StatusCodes.CREATED)
-      .json({ message: "Data add in Data base", response });
-  } catch (error) {
-    console.log(error);
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: "Internal issue" });
-  }
-};
+  const data = {
+    title,
+    description,
+    image,
+    category,
+    price,
+    location,
+    country,
+  };
+  const response = await Listing.create(data);
 
-export const getListingById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const data = await Listing.findById(id);
-    if (!data) {
-      return res
-        .status(StatusCodes.NOT_FOUND) // 404
-        .json({
-          success: false,
-          message: "Bhai, yeh hotel database mein nahi mila!",
-        });
-    }
-    return res.status(StatusCodes.OK).json({ message: "Success", data });
-  } catch (error) {
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: "Internal Issue" });
-  }
-};
+  console.log("New Listing Created:", response.title);
+  return res
+    .status(StatusCodes.CREATED)
+    .json({ message: "Data added in Database successfully! 🎉", response });
+});
 
-export const updateListing = async (req, res) => {
-  try {
-    let { id } = req.params;
-    let { title, description, image, category, price, location, country } =
-      req.body;
-    if (
-      !title ||
-      !description ||
-      !category ||
-      !price ||
-      !location ||
-      !country
-    ) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Bhai saheb, saari fields bharna zaroori hai!" });
-    }
-    let updateData = {
-      title,
-      description,
-      image,
-      category,
-      price,
-      location,
-      country,
-    };
-    const response = await Listing.findByIdAndUpdate(id, updateData, {
-      new: true,
+// 3. GET LISTING BY ID
+export const getListingById = wrapAsync(async (req, res) => {
+  const { id } = req.params;
+  const data = await Listing.findById(id);
+
+  if (!data) {
+    return res.status(StatusCodes.NOT_FOUND).json({
+      success: false,
+      message: "Bhai, yeh hotel database mein nahi mila!",
     });
-
-    console.log(response);
-
-    if (!response) {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .json({ message: "data is Not Found" });
-    }
-    return res
-      .status(StatusCodes.OK)
-      .json({ message: "Update data", response });
-  } catch (error) {
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: "Internal Issue" });
   }
-};
+  return res.status(StatusCodes.OK).json({ message: "Success", data });
+});
 
-export const deleteListing = async (req, res) => {
-  try {
-    let { id } = req.params;
-    const response = await Listing.findByIdAndDelete(id);
-    if (!response) {
-      return res.status(StatusCodes.NOT_FOUND).json({ message: "Not Found" });
-    }
+// 4. UPDATE LISTING BY ID
+export const updateListing = wrapAsync(async (req, res) => {
+  const { id } = req.params;
+  const { title, description, image, category, price, location, country } =
+    req.body;
+
+  if (!title || !description || !category || !price || !location || !country) {
     return res
-      .status(StatusCodes.OK)
-      .json({ message: "data delete", response });
-  } catch (error) {
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: "Internal Issue" });
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: "Bhai saheb, saari fields bharna zaroori hai!" });
   }
-};
+
+  const updateData = {
+    title,
+    description,
+    image,
+    category,
+    price,
+    location,
+    country,
+  };
+
+  // { new: true } lagaya hai taaki updated data response mein mile
+  const response = await Listing.findByIdAndUpdate(id, updateData, {
+    new: true,
+  });
+
+  if (!response) {
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ message: "Data not found to update!" });
+  }
+
+  console.log("Listing Updated:", response.title);
+  return res
+    .status(StatusCodes.OK)
+    .json({ message: "Update successful", response });
+});
+
+// 5. DELETE LISTING BY ID
+export const deleteListing = wrapAsync(async (req, res) => {
+  const { id } = req.params;
+  const response = await Listing.findByIdAndDelete(id);
+
+  if (!response) {
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ message: "Data not found to delete!" });
+  }
+
+  console.log("Listing Deleted ID:", id);
+  return res
+    .status(StatusCodes.OK)
+    .json({ message: "Data deleted successfully from DB", response });
+});

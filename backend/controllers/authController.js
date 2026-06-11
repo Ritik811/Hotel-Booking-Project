@@ -2,107 +2,94 @@ import bcrypt from "bcrypt";
 import { User } from "../Models/User.js";
 import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
+import { wrapAsync } from "../utils/wrapAsync.js";
 
-export const userRegister = async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
+export const userRegister = wrapAsync(async (req, res) => {
+  const { username, email, password } = req.body;
 
-    // 1. Validation:
-    if (!username || !email || !password) {
-      console.log("Validation Failed: Empty Fields");
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "All fields (username, email, password) are required!",
-      });
-    }
-
-    const userExist = await User.findOne({ $or: [{ email }, { username }] });
-    if (userExist) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Username or Email already exists!" });
-    }
-
-    // 2. Password Hashing
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // 3. Create New User
-    const newUser = await User.create({
-      username,
-      email,
-      password: hashedPassword,
+  // 1. Validation:
+  if (!username || !email || !password) {
+    console.log("Validation Failed: Empty Fields");
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      message: "All fields (username, email, password) are required!",
     });
+  }
 
-    console.log("New User Created:", newUser.username);
+  const userExist = await User.findOne({ $or: [{ email }, { username }] });
+  if (userExist) {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: "Username or Email already exists!" });
+  }
 
-    // 4. Success Response
-    return res.status(StatusCodes.CREATED).json({
-      message: "User Registered Successfully! 🎉",
+  // 2. Password Hashing
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
+  // 3. Create New User
+  const newUser = await User.create({
+    username,
+    email,
+    password: hashedPassword,
+  });
+
+  console.log("New User Created:", newUser.username);
+
+  // 4. Success Response
+  return res.status(StatusCodes.CREATED).json({
+    message: "User Registered Successfully! 🎉",
+    user: {
+      id: newUser._id,
+      username: newUser.username,
+      email: newUser.email,
+      isAdmin: newUser.isAdmin,
+    },
+  });
+});
+
+export const userLogin = wrapAsync(async (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    console.log("Username and Password Empty");
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: "username or Password is Empty" });
+  }
+
+  const userExist = await User.findOne({ username });
+
+  if (!userExist) {
+    console.log("UNAUTHORIZED User");
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ message: "UNAUTHORIZED People Please First Register" });
+  }
+
+  const isMatch = await bcrypt.compare(password, userExist.password);
+  if (isMatch) {
+    const token = jwt.sign(
+      {
+        id: userExist._id,
+        isAdmin: userExist.isAdmin,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" },
+    );
+    console.log("login");
+    return res.status(StatusCodes.OK).json({
+      message: "Login SuccessFull",
+      token,
       user: {
-        id: newUser._id,
-        username: newUser.username,
-        email: newUser.email,
-        isAdmin: newUser.isAdmin,
+        id: userExist._id,
+        username: userExist.username,
+        email: userExist.email,
+        isAdmin: userExist.isAdmin,
       },
     });
-  } catch (error) {
-    console.log(error);
+  } else {
+    console.log("Password Wrong");
     return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: "Internal Server Issue", error: error.message });
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: "Password Wrong" });
   }
-};
-
-export const userLogin = async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    if (!username || !password) {
-      console.log("Username and Password Empty");
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "username or Password is Empty" });
-    }
-
-    const userExist = await User.findOne({ username });
-
-    if (!userExist) {
-      console.log("UNAUTHORIZED User");
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .json({ message: "UNAUTHORIZED People Please First Register" });
-    }
-
-    const isMatch = await bcrypt.compare(password, userExist.password);
-    if (isMatch) {
-      const token = jwt.sign(
-        {
-          id: userExist._id,
-          isAdmin: userExist.isAdmin,
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: "7d" },
-      );
-      console.log("login");
-      return res.status(StatusCodes.OK).json({
-        message: "Login SuccessFull",
-        token,
-        user: {
-          id: userExist._id,
-          username: userExist.username,
-          email: userExist.email,
-          isAdmin: userExist.isAdmin,
-        },
-      });
-    } else {
-      console.log("Password Wrong");
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Password Wrong" });
-    }
-  } catch (error) {
-    console.log(error);
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: "Server Error", error: error.message });
-  }
-};
+});

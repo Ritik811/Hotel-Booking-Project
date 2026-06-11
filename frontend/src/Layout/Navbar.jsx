@@ -10,8 +10,11 @@ import {
 } from "@mui/material";
 import TravelExploreIcon from "@mui/icons-material/TravelExplore"; // Logo Icon
 import SearchIcon from "@mui/icons-material/Search"; // Search Icon
+import { useNavigate } from "react-router-dom";
 
 function Navbar() {
+  const navigate = useNavigate();
+
   return (
     <AppBar
       position="static"
@@ -24,7 +27,7 @@ function Navbar() {
       <Toolbar sx={{ justifyContent: "space-between", padding: "0 24px" }}>
         {/* 1. LEFT SIDE: Logo aur Brand Name */}
         <Box
-          onClick={() => console.log("Logo Clicked - Route to Home")} // 🔥 Tum yahan apna logic likhna
+          onClick={() => navigate("/")}
           sx={{
             display: "flex",
             alignItems: "center",
@@ -101,7 +104,7 @@ function Navbar() {
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           {/* ✨ NEW: Airbnb your home (Create Listing Button) */}
           <Button
-            onClick={() => console.log("Navigate to Create Page")} // 🔥 Navigation logic yahan aayega
+            onClick={() => navigate("/listings/new")}
             sx={{
               color: "#222222",
               fontWeight: "600",
@@ -126,6 +129,7 @@ function Navbar() {
               borderRadius: "24px",
               padding: "8px 16px",
             }}
+            onClick={() => navigate("/")}
           >
             Home
           </Button>

@@ -66,3 +66,24 @@ export const deleteReviews = wrapAsync(async (req, res) => {
     .status(StatusCodes.OK)
     .json({ success: true, message: "Review is Deleted" });
 });
+
+export const updateReviews = wrapAsync(async (req, res) => {
+  let { id, reviewId } = req.params;
+  let { comment, rating } = req.body;
+
+  let updateReview = await Review.findByIdAndUpdate(
+    reviewId,
+    { comment, rating },
+    { new: true, runValidators: true },
+  );
+
+  if (!updateReview) {
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ message: "Review Id is Not Valid" });
+  }
+
+  return res
+    .status(StatusCodes.OK)
+    .json({ success: true, message: "update Review " });
+});

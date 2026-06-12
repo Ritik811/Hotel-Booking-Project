@@ -41,7 +41,7 @@ export const createListings = wrapAsync(async (req, res) => {
 // 3. GET LISTING BY ID
 export const getListingById = wrapAsync(async (req, res) => {
   const { id } = req.params;
-  const data = await Listing.findById(id);
+  const data = await Listing.findById(id).populate("review");
 
   if (!data) {
     return res.status(StatusCodes.NOT_FOUND).json({

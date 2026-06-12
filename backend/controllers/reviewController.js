@@ -36,3 +36,33 @@ export const createReviews = wrapAsync(async (req, res) => {
     });
   }
 });
+
+export const deleteReviews = wrapAsync(async (req, res) => {
+  let { id, reviewId } = req.params;
+
+  let deleteReview = await Review.findByIdAndDelete(reviewId);
+
+  if (!deleteReview) {
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ message: "Review is Not Available" });
+  }
+
+  let updateListing = await Listing.findByIdAndUpdate(
+    id,
+    {
+      $pull: { review: reviewId },
+    },
+    { new: true },
+  );
+
+  if (!updateListing) {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: "Listing Id wrong, couldn't update array" });
+  }
+
+  return res
+    .status(StatusCodes.OK)
+    .json({ success: true, message: "Review is Deleted" });
+});

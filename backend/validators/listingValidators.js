@@ -23,5 +23,5 @@ export const listingValidationSchema = z.object({
 
   location: z.string({ required_error: "Location is required" }).trim(),
   country: z.string({ required_error: "Country is required" }).trim(),
-  image: z.string().url("Image url is valid").optional().or(z.literal("")),
+  image: z.string().url("Image url is valid").or(z.literal("")).optional(),
 });

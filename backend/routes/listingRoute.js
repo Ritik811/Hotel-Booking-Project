@@ -6,13 +6,15 @@ import {
   updateListing,
   deleteListing,
 } from "../controllers/listingController.js";
+import { listingValidate } from "../Middleware/ListingValidateReq.js";
 
 const router = Router();
 
 router.get("/", getAllListings);
-router.post("/", createListings);
 router.get("/:id", getListingById);
-router.put("/:id", updateListing);
 router.delete("/:id", deleteListing);
+
+router.post("/", listingValidate, createListings);
+router.put("/:id", listingValidate, updateListing);
 
 export const listingRouter = router;

@@ -5,6 +5,7 @@ import cors from "cors";
 import { userRouter } from "./routes/userRoute.js";
 import { listingRouter } from "./routes/listingRoute.js";
 import { INTERNAL_SERVER_ERROR, StatusCodes } from "http-status-codes";
+import { reviewRouter } from "./routes/reviewRoute.js";
 
 dotenv.config();
 const app = express();
@@ -25,6 +26,7 @@ databaseConnected();
 
 app.use("/auth", userRouter);
 app.use("/listings", listingRouter);
+app.use("/listings", reviewRouter);
 
 app.get("/", (req, res) => {
   res.send("Start Project");

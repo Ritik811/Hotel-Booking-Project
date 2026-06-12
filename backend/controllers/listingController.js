@@ -1,4 +1,4 @@
-import { Listing } from "../models/Listing.js";
+import { Listing } from "../Models/Listing.js";
 import { StatusCodes } from "http-status-codes";
 import { wrapAsync } from "../utils/wrapAsync.js";
 

@@ -47,7 +47,7 @@ export const deleteListing = async (id) => {
 
 export const updateListing = async (id, updateData) => {
   try {
-    const res = await apiClient.put(`/listings/${id}`, updateData);
+    const res = await apiClient.put(`listings/${id}`, updateData);
     console.log("updateListingDataAxios", res.data);
     return res.data;
   } catch (error) {

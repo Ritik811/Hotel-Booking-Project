@@ -23,5 +23,17 @@ export const listingValidationSchema = z.object({
 
   location: z.string({ required_error: "Location is required" }).trim(),
   country: z.string({ required_error: "Country is required" }).trim(),
-  image: z.string().url("Image url is valid").or(z.literal("")).optional(),
+
+  // 🔥 FIX: Ab yeh simple string, empty string, ya database wala image object/array sab accept karega!
+  image: z
+    .union([
+      z.string().url(),
+      z.literal(""),
+      z.object({
+        url: z.string().url().optional(),
+        filename: z.string().optional(),
+      }),
+      z.array(z.any()),
+    ])
+    .optional(),
 });

@@ -8,6 +8,12 @@ export const listingValidate = (req, res, next) => {
   const result = listingValidationSchema.safeParse(req.body);
 
   if (!result.success) {
+    // 🔥 DEBUG HACK: Terminal par exact Zod issues dekhne ke liye
+    console.log(
+      "❌ ZOD VALIDATION FAILED! Issues:",
+      JSON.stringify(result.error.issues, null, 2),
+    );
+
     let errorMessage = "Validation failed";
 
     if (result.error && result.error.issues && result.error.issues.length > 0) {

@@ -2,6 +2,10 @@ import { StatusCodes } from "http-status-codes";
 import reviewSchemaValidator from "../validators/reviewValidators.js";
 
 export const reviewValidate = (req, res, next) => {
+  if (req.body.rating) {
+    req.body.rating = Number(req.body.rating);
+  }
+
   const result = reviewSchemaValidator.safeParse(req.body);
 
   if (!result.success) {

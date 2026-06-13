@@ -22,40 +22,67 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate, useParams } from "react-router-dom";
 import { deleteListing, getListingDetails } from "../api/listings";
-import { deleteReviews } from "../api/review";
+import { createReviews, deleteReviews } from "../api/review";
 
 export const ListingDetailPage = () => {
   const [listing, setListing] = useState({});
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [comment, setComment] = useState("");
-  const [rating, setRating] = useState(5);
+  const [reviewData, setReviewData] = useState({
+    comment: "",
+    rating: 5,
+  });
+
+  const fetchListing = async () => {
+    try {
+      const res = await getListingDetails(id);
+      setListing(res.data || {});
+    } catch (error) {
+      console.error("Error fetching listing details:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchListing = async () => {
-      try {
-        const res = await getListingDetails(id);
-        setListing(res.data || {});
-      } catch (error) {
-        console.error("Error fetching listing details:", error);
-      }
-    };
     if (id) fetchListing();
   }, [id]);
 
   const handleDeleteButton = async () => {
-    
+    try {
+      const deleteData = await deleteListing(id);
+      navigate("/");
+      console.log("delete data", deleteData);
+      return deleteData;
+    } catch (error) {
+      console.log("Frontend Error", error);
+      alert("Listing delete nahi ho payi, please dubara try karein!");
+    }
+  };
+
+  const handleOnChange = (e) => {
+    let { name, value } = e.target;
+    setReviewData({ ...reviewData, [name]: value });
   };
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
+    try {
+      const res = await createReviews(id, reviewData);
+      console.log(res);
+      setReviewData({ comment: "", rating: 5 });
+      fetchListing();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleReviewDelete = async (reviewId) => {
     try {
       const res = await deleteReviews(id, reviewId);
       console.log(res);
+      if (res) {
+        fetchListing();
+      }
     } catch (error) {
       console.log("Error Frontend", error);
     }
@@ -298,9 +325,9 @@ export const ListingDetailPage = () => {
                 Rating
               </Typography>
               <Rating
-                name="review-rating"
-                value={rating}
-                onChange={(event, newValue) => setRating(newValue)}
+                name="rating"
+                value={reviewData.rating}
+                onChange={handleOnChange}
                 size="large"
               />
             </Box>
@@ -310,8 +337,9 @@ export const ListingDetailPage = () => {
               fullWidth
               multiline
               rows={3}
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
+              name="comment"
+              value={reviewData.comment}
+              onChange={handleOnChange}
               sx={{ mb: 2, backgroundColor: "#fff" }}
             />
 
@@ -464,7 +492,7 @@ export const ListingDetailPage = () => {
         <Grid container spacing={3}>
           {listing.review &&
             listing.review.map((rev) => (
-              <Grid item xs={12} sm={6} key={rev._id}>
+              <Grid xs={12} sm={6} key={rev._id}>
                 <Card
                   variant="outlined"
                   sx={{

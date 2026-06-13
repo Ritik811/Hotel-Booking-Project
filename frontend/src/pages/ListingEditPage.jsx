@@ -31,7 +31,6 @@ export const ListingEditPage = () => {
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
 
-  // 🚀 1. State hamesha functions se upar honi chahiye
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -72,13 +71,17 @@ export const ListingEditPage = () => {
 
   const handleChange = (evt) => {
     const { name, value } = evt.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData({
+      ...formData,
+      [name]: name === "price" ? (value === "" ? "" : Number(value)) : value,
+    });
   };
 
   const handleSubmit = async (evt) => {
     evt.preventDefault();
     if (!validateForm()) return;
     try {
+      console.log("Submitting Clean Data:", formData);
       await updateListing(id, formData);
       console.log("Success Updated");
       navigate(-1);

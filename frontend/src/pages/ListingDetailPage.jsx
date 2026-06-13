@@ -22,7 +22,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate, useParams } from "react-router-dom";
 import { deleteListing, getListingDetails } from "../api/listings";
-import { createReviews, deleteReviews } from "../api/review";
+import {
+  createReviews,
+  deleteReviews, 
+  updateReviews,
+} from "../api/review"; 
 
 export const ListingDetailPage = () => {
   const [listing, setListing] = useState({});
@@ -33,6 +37,10 @@ export const ListingDetailPage = () => {
     comment: "",
     rating: 5,
   });
+
+
+  const [isEditingReview, setIsEditingReview] = useState(false);
+  const [editingReviewId, setEditingReviewId] = useState(null);
 
   const fetchListing = async () => {
     try {
@@ -59,6 +67,16 @@ export const ListingDetailPage = () => {
     }
   };
 
+
+  const handleEditReview = (rev) => {
+    setIsEditingReview(true);
+    setEditingReviewId(rev._id);
+    setReviewData({
+      comment: rev.comment || "",
+      rating: rev.rating || 5,
+    });
+  };
+
   const handleOnChange = (e) => {
     let { name, value } = e.target;
     setReviewData({ ...reviewData, [name]: value });
@@ -67,8 +85,25 @@ export const ListingDetailPage = () => {
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await createReviews(id, reviewData);
-      console.log(res);
+      if (isEditingReview) {
+        //  EDIT MODE: Yahan tumhaari review update karne wali API aayegi
+        const res = await updateReviews(id, editingReviewId, reviewData);
+        console.log(
+          "Review Update Ho Raha Hai:",
+          reviewData,
+          "Id:",
+          editingReviewId,
+        );
+
+        // Form aur states reset
+        setIsEditingReview(false);
+        setEditingReviewId(null);
+      } else {
+        //  NORMAL MODE: Naya review create ho rha hai
+        const res = await createReviews(id, reviewData);
+        console.log(res);
+      }
+
       setReviewData({ comment: "", rating: 5 });
       fetchListing();
     } catch (error) {
@@ -189,7 +224,7 @@ export const ListingDetailPage = () => {
                 {dummyListing.hostName}
               </Typography>
               <Typography variant="body2" sx={{ color: "#717171" }}>
-                8 guests · 4 bedrooms · 4 beds · 4 bathrooms
+                14 guests · 4 bedrooms · 4 beds · 4 bathrooms
               </Typography>
             </Box>
             <Avatar sx={{ width: 56, height: 56, backgroundColor: "#FF385C" }}>
@@ -263,7 +298,7 @@ export const ListingDetailPage = () => {
             </Box>
           </Box>
 
-          <Divider sx={{ margin: "32px 0" }} />
+          <Divider sx={{ margin: "24px 0" }} />
 
           {/* Admin Buttons */}
           <Box sx={{ display: "flex", gap: "16px", marginTop: "24px" }}>
@@ -302,7 +337,7 @@ export const ListingDetailPage = () => {
 
           <Divider sx={{ margin: "32px 0" }} />
 
-          {/* ✍️ UI ONLY: CREATE REVIEW FORM */}
+          {/* ✍️ CREATE / EDIT REVIEW FORM */}
           <Box
             component="form"
             onSubmit={handleReviewSubmit}
@@ -313,8 +348,9 @@ export const ListingDetailPage = () => {
               backgroundColor: "#fafafa",
             }}
           >
+            {/* 🔥 UI DYNAMIC CHANGE: Heading badlegi mode ke hisab se */}
             <Typography variant="h6" sx={{ fontWeight: "600", mb: 2 }}>
-              Leave a Review
+              {isEditingReview ? "Edit Your Review ✏️" : "Leave a Review"}
             </Typography>
 
             <Box sx={{ mb: 2 }}>
@@ -324,12 +360,16 @@ export const ListingDetailPage = () => {
               >
                 Rating
               </Typography>
-              <Rating
-                name="rating"
-                value={reviewData.rating}
-                onChange={handleOnChange}
-                size="large"
-              />
+              <Paper elevation={0} sx={{ backgroundColor: "transparent" }}>
+                <Rating
+                  name="rating"
+                  value={Number(reviewData.rating)}
+                  onChange={(event, newValue) => {
+                    setReviewData({ ...reviewData, rating: newValue });
+                  }}
+                  size="large"
+                />
+              </Paper>
             </Box>
 
             <TextField
@@ -343,19 +383,40 @@ export const ListingDetailPage = () => {
               sx={{ mb: 2, backgroundColor: "#fff" }}
             />
 
-            <Button
-              type="submit"
-              variant="contained"
-              sx={{
-                backgroundColor: "#FF385C",
-                color: "#fff",
-                fontWeight: "600",
-                textTransform: "none",
-                "&:hover": { backgroundColor: "#DC143C" },
-              }}
-            >
-              Submit Review
-            </Button>
+            <Box sx={{ display: "flex", gap: 2 }}>
+              {/* 🔥 UI DYNAMIC CHANGE: Color aur Text mode ke hisab se change hoga */}
+              <Button
+                type="submit"
+                variant="contained"
+                sx={{
+                  backgroundColor: isEditingReview ? "#4CAF50" : "#FF385C",
+                  color: "#fff",
+                  fontWeight: "600",
+                  textTransform: "none",
+                  "&:hover": {
+                    backgroundColor: isEditingReview ? "#45a049" : "#DC143C",
+                  },
+                }}
+              >
+                {isEditingReview ? "Update Review" : "Submit Review"}
+              </Button>
+
+              {/* 🔥 NEW UI ELEMENT: Cancel button jo sirf tab dikhega jab user edit kar raha ho */}
+              {isEditingReview && (
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={() => {
+                    setIsEditingReview(false);
+                    setEditingReviewId(null);
+                    setReviewData({ comment: "", rating: 5 });
+                  }}
+                  sx={{ textTransform: "none", fontWeight: "600" }}
+                >
+                  Cancel
+                </Button>
+              )}
+            </Box>
           </Box>
         </Box>
 
@@ -470,7 +531,7 @@ export const ListingDetailPage = () => {
         </Box>
       </Box>
 
-      {/* 📜 UI ONLY: ALL REVIEWS CARDS GRID */}
+      {/* 📜 ALL REVIEWS CARDS GRID */}
       <Box sx={{ marginTop: "48px" }}>
         <Divider sx={{ mb: 4 }} />
         <Typography
@@ -536,14 +597,27 @@ export const ListingDetailPage = () => {
                         </Box>
                       </Box>
 
-                      {/* Delete Icon Button UI */}
-                      <IconButton
-                        color="error"
-                        onClick={() => handleReviewDelete(rev._id)}
-                        size="small"
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
+                      {/* 🛠️ Action Buttons Container (Edit + Delete) */}
+                      <Box sx={{ display: "flex", gap: 0.5 }}>
+                        {/* ✏️ Edit Icon Button */}
+                        <IconButton
+                          color="primary"
+                          onClick={() => handleEditReview(rev)} // 🔥 Tumhaare is purane function ko call par connect kar diya hai
+                          size="small"
+                          sx={{ color: "#007A87" }}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+
+                        {/* 🗑️ Delete Icon Button */}
+                        <IconButton
+                          color="error"
+                          onClick={() => handleReviewDelete(rev._id)}
+                          size="small"
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
                     </Box>
 
                     <Rating

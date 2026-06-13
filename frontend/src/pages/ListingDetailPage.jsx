@@ -8,12 +8,17 @@ import {
   Avatar,
   Button,
   Paper,
+  TextField,
+  Grid,
+  Card,
+  CardContent,
+  IconButton,
 } from "@mui/material";
 import WifiIcon from "@mui/icons-material/Wifi";
 import PoolIcon from "@mui/icons-material/Pool";
 import TvIcon from "@mui/icons-material/Tv";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
-import EditIcon from "@mui/icons-material/Edit"; // 🎯 UI Icons import kiye
+import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate, useParams } from "react-router-dom";
 import { deleteListing, getListingDetails } from "../api/listings";
@@ -23,11 +28,14 @@ export const ListingDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  // 📝 UI States (Sirf values hold karne ke liye)
+  const [comment, setComment] = useState("");
+  const [rating, setRating] = useState(5);
+
   useEffect(() => {
     const fetchListing = async () => {
       try {
         const res = await getListingDetails(id);
-        console.log("Response aagya hai ", res.data);
         setListing(res.data || {});
       } catch (error) {
         console.error("Error fetching listing details:", error);
@@ -36,16 +44,18 @@ export const ListingDetailPage = () => {
     if (id) fetchListing();
   }, [id]);
 
+  // 🛠️ LOGIC HOOKS: Inme tum apna logic likhna bhai
   const handleDeleteButton = async () => {
-    try {
-      const deleteData = await deleteListing(id);
-      navigate("/");
-      console.log("delete data", deleteData);
-      return deleteData;
-    } catch (error) {
-      console.log("Frontend Error", error);
-      alert("Listing delete nahi ho payi, please dubara try karein!");
-    }
+    // Tumhara listing delete ka logic yahan aayega
+  };
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    // 🔥 WRITE YOUR SUBMIT LOGIC HERE RITIK BHAI
+  };
+
+  const handleReviewDelete = async (reviewId) => {
+    // 🔥 WRITE YOUR DELETE LOGIC HERE RITIK BHAI
   };
 
   const dummyListing = {
@@ -95,7 +105,7 @@ export const ListingDetailPage = () => {
               cursor: "pointer",
             }}
           >
-            {dummyListing.reviewsCount} reviews
+            {listing.review?.length || 0} reviews
           </Typography>
           <Typography
             variant="body2"
@@ -129,7 +139,7 @@ export const ListingDetailPage = () => {
           gap: "64px",
         }}
       >
-        {/* ⬅️ LEFT SIDE: Description, Amenities & Admin Buttons */}
+        {/* ⬅️ LEFT SIDE */}
         <Box>
           {/* Host Info */}
           <Box
@@ -225,15 +235,8 @@ export const ListingDetailPage = () => {
 
           <Divider sx={{ margin: "32px 0" }} />
 
-          {/* 🎯 UI ONLY: EDIT & DELETE BUTTONS AREA */}
-          <Box
-            sx={{
-              display: "flex",
-              gap: "16px",
-              marginTop: "24px",
-            }}
-          >
-            {/* Edit Button UI */}
+          {/* Admin Buttons */}
+          <Box sx={{ display: "flex", gap: "16px", marginTop: "24px" }}>
             <Button
               variant="outlined"
               startIcon={<EditIcon />}
@@ -245,16 +248,11 @@ export const ListingDetailPage = () => {
                 fontWeight: "600",
                 padding: "8px 24px",
                 borderRadius: "8px",
-                "&:hover": {
-                  borderColor: "#115293",
-                  backgroundColor: "rgba(25, 118, 210, 0.04)",
-                },
               }}
             >
               Edit Listing
             </Button>
 
-            {/* Delete Button UI */}
             <Button
               variant="outlined"
               startIcon={<DeleteIcon />}
@@ -266,13 +264,66 @@ export const ListingDetailPage = () => {
                 fontWeight: "600",
                 padding: "8px 24px",
                 borderRadius: "8px",
-                "&:hover": {
-                  borderColor: "#9a0007",
-                  backgroundColor: "rgba(211, 47, 47, 0.04)",
-                },
               }}
             >
               Delete Listing
+            </Button>
+          </Box>
+
+          <Divider sx={{ margin: "32px 0" }} />
+
+          {/* ✍️ UI ONLY: CREATE REVIEW FORM */}
+          <Box
+            component="form"
+            onSubmit={handleReviewSubmit}
+            sx={{
+              p: 3,
+              border: "1px solid #e0e0e0",
+              borderRadius: "12px",
+              backgroundColor: "#fafafa",
+            }}
+          >
+            <Typography variant="h6" sx={{ fontWeight: "600", mb: 2 }}>
+              Leave a Review
+            </Typography>
+
+            <Box sx={{ mb: 2 }}>
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: "600", mb: 0.5, color: "#444" }}
+              >
+                Rating
+              </Typography>
+              <Rating
+                name="review-rating"
+                value={rating}
+                onChange={(event, newValue) => setRating(newValue)}
+                size="large"
+              />
+            </Box>
+
+            <TextField
+              label="Share your thoughts about this place..."
+              fullWidth
+              multiline
+              rows={3}
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              sx={{ mb: 2, backgroundColor: "#fff" }}
+            />
+
+            <Button
+              type="submit"
+              variant="contained"
+              sx={{
+                backgroundColor: "#FF385C",
+                color: "#fff",
+                fontWeight: "600",
+                textTransform: "none",
+                "&:hover": { backgroundColor: "#DC143C" },
+              }}
+            >
+              Submit Review
             </Button>
           </Box>
         </Box>
@@ -289,7 +340,6 @@ export const ListingDetailPage = () => {
               top: "24px",
             }}
           >
-            {/* Price Area */}
             <Box
               sx={{
                 display: "flex",
@@ -302,7 +352,7 @@ export const ListingDetailPage = () => {
                 variant="h5"
                 sx={{ fontWeight: "bold", color: "#222" }}
               >
-                ₹
+                ₹{" "}
                 {listing.price
                   ? listing.price.toLocaleString("en-IN")
                   : dummyListing.price.toLocaleString("en-IN")}
@@ -325,7 +375,6 @@ export const ListingDetailPage = () => {
               </Box>
             </Box>
 
-            {/* Date Inputs Box */}
             <Box
               sx={{
                 border: "1px solid #b0b0b0",
@@ -370,7 +419,6 @@ export const ListingDetailPage = () => {
               </Box>
             </Box>
 
-            {/* Action Button */}
             <Button
               variant="contained"
               fullWidth
@@ -387,15 +435,104 @@ export const ListingDetailPage = () => {
             >
               Reserve Now
             </Button>
-
-            <Typography
-              variant="body2"
-              sx={{ color: "#717171", textAlign: "center", marginTop: "12px" }}
-            >
-              You won't be charged yet
-            </Typography>
           </Paper>
         </Box>
+      </Box>
+
+      {/* 📜 UI ONLY: ALL REVIEWS CARDS GRID */}
+      <Box sx={{ marginTop: "48px" }}>
+        <Divider sx={{ mb: 4 }} />
+        <Typography
+          variant="h5"
+          sx={{ fontWeight: "600", mb: 3, color: "#222" }}
+        >
+          Reviews ({listing.review?.length || 0})
+        </Typography>
+
+        {(!listing.review || listing.review.length === 0) && (
+          <Typography
+            variant="body1"
+            sx={{ color: "#717171", fontStyle: "italic" }}
+          >
+            No reviews yet for this villa. Be the first to write a review!
+          </Typography>
+        )}
+
+        <Grid container spacing={3}>
+          {listing.review &&
+            listing.review.map((rev) => (
+              <Grid item xs={12} sm={6} key={rev._id}>
+                <Card
+                  variant="outlined"
+                  sx={{
+                    borderRadius: "12px",
+                    boxShadow: "0px 2px 8px rgba(0,0,0,0.05)",
+                  }}
+                >
+                  <CardContent>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mb: 1,
+                      }}
+                    >
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+                      >
+                        <Avatar
+                          sx={{ width: 40, height: 40, bgcolor: "#1976d2" }}
+                        >
+                          {rev.author?.username
+                            ? rev.author.username[0].toUpperCase()
+                            : "U"}
+                        </Avatar>
+                        <Box>
+                          <Typography
+                            variant="subtitle2"
+                            sx={{ fontWeight: "600" }}
+                          >
+                            {rev.author?.username || "Verified Guest"}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {rev.createdAt
+                              ? new Date(rev.createdAt).toLocaleDateString(
+                                  "en-IN",
+                                )
+                              : "Recently"}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      {/* Delete Icon Button UI */}
+                      <IconButton
+                        color="error"
+                        onClick={() => handleReviewDelete(rev._id)}
+                        size="small"
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+
+                    <Rating
+                      value={rev.rating || 5}
+                      readOnly
+                      size="small"
+                      sx={{ mb: 1 }}
+                    />
+
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "#484848", lineHeight: "1.5" }}
+                    >
+                      {rev.comment}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+        </Grid>
       </Box>
     </Container>
   );

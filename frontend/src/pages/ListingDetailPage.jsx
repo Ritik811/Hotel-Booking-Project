@@ -22,12 +22,12 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate, useParams } from "react-router-dom";
 import { deleteListing, getListingDetails } from "../api/listings";
+import { deleteReviews } from "../api/review";
 
 export const ListingDetailPage = () => {
   const [listing, setListing] = useState({});
   const { id } = useParams();
   const navigate = useNavigate();
-
 
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(5);
@@ -44,18 +44,21 @@ export const ListingDetailPage = () => {
     if (id) fetchListing();
   }, [id]);
 
-  
   const handleDeleteButton = async () => {
     
   };
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
-    
   };
 
   const handleReviewDelete = async (reviewId) => {
-    
+    try {
+      const res = await deleteReviews(id, reviewId);
+      console.log(res);
+    } catch (error) {
+      console.log("Error Frontend", error);
+    }
   };
 
   const dummyListing = {

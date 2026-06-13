@@ -28,7 +28,7 @@ export const ListingDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // 📝 UI States (Sirf values hold karne ke liye)
+
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(5);
 
@@ -44,18 +44,18 @@ export const ListingDetailPage = () => {
     if (id) fetchListing();
   }, [id]);
 
-  // 🛠️ LOGIC HOOKS: Inme tum apna logic likhna bhai
+  
   const handleDeleteButton = async () => {
-    // Tumhara listing delete ka logic yahan aayega
+    
   };
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
-    // 🔥 WRITE YOUR SUBMIT LOGIC HERE RITIK BHAI
+    
   };
 
   const handleReviewDelete = async (reviewId) => {
-    // 🔥 WRITE YOUR DELETE LOGIC HERE RITIK BHAI
+    
   };
 
   const dummyListing = {

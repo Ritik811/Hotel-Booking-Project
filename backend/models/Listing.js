@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { Review } from "./Review.js";
 
 const listingSchema = new mongoose.Schema(
   {
@@ -53,5 +54,12 @@ const listingSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+// Middleware: Jo listing delete hone ke baad auto-trigger hoga
+listingSchema.post("findOneAndDelete", async (listing) => {
+  if (listing) {
+    await Review.deleteMany({ _id: { $in: listing.review } });
+    console.log("Listing Related Review are Delete");
+  }
+});
 
 export const Listing = mongoose.model("Listing", listingSchema);

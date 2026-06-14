@@ -6,14 +6,30 @@ import { userRouter } from "./routes/userRoute.js";
 import { listingRouter } from "./routes/listingRoute.js";
 import { INTERNAL_SERVER_ERROR, StatusCodes } from "http-status-codes";
 import { reviewRouter } from "./routes/reviewRoute.js";
+import session from "express-session";
 
 dotenv.config();
 const app = express();
 
+const sessionOptions = {
+  secret: "MySecretIsSuperCode",
+  saveUninitialized: true,
+  resave: false,
+  cookie: {
+    secure: false,
+    httpOnly: true,
+    sameSite: "lax",
+  },
+};
+
 app.use(express.json());
-app.use(cors());
-
-
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
+app.use(session(sessionOptions));
 
 const MONGO_URL = process.env.MONGO_URL;
 const databaseConnected = async () => {

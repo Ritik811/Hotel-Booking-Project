@@ -37,6 +37,7 @@ export const userRegister = wrapAsync(async (req, res) => {
 
   // 4. Success Response
   return res.status(StatusCodes.CREATED).json({
+    success: true,
     message: "User Registered Successfully! 🎉",
     user: {
       id: newUser._id,
@@ -77,6 +78,7 @@ export const userLogin = wrapAsync(async (req, res) => {
     );
     console.log("login");
     return res.status(StatusCodes.OK).json({
+      success: true,
       message: "Login SuccessFull",
       token,
       user: {

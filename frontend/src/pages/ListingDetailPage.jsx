@@ -22,11 +22,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate, useParams } from "react-router-dom";
 import { deleteListing, getListingDetails } from "../api/listings";
-import {
-  createReviews,
-  deleteReviews, 
-  updateReviews,
-} from "../api/review"; 
+import { createReviews, deleteReviews, updateReviews } from "../api/review";
+import { toast } from "react-toastify";
 
 export const ListingDetailPage = () => {
   const [listing, setListing] = useState({});
@@ -37,7 +34,6 @@ export const ListingDetailPage = () => {
     comment: "",
     rating: 5,
   });
-
 
   const [isEditingReview, setIsEditingReview] = useState(false);
   const [editingReviewId, setEditingReviewId] = useState(null);
@@ -58,15 +54,19 @@ export const ListingDetailPage = () => {
   const handleDeleteButton = async () => {
     try {
       const deleteData = await deleteListing(id);
-      navigate("/");
-      console.log("delete data", deleteData);
-      return deleteData;
+      if (deleteData.success) {
+        toast.success("Listing is Delete Successfully");
+        setTimeout(() => {
+          navigate("/");
+          console.log("delete data", deleteData);
+          return deleteData;
+        }, 2000);
+      }
     } catch (error) {
       console.log("Frontend Error", error);
-      alert("Listing delete nahi ho payi, please dubara try karein!");
+      toast.error("Something went wrong listing is Not Deleted");
     }
   };
-
 
   const handleEditReview = (rev) => {
     setIsEditingReview(true);

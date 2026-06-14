@@ -32,7 +32,7 @@ export const createListing = async (formData) => {
     console.log(res.data);
     return res.data;
   } catch (error) {
-    console.log("Error", error.message);
+    throw console.log("Error", error.message);
   }
 };
 

@@ -25,6 +25,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate, useParams } from "react-router-dom";
 import { getListingDetails, updateListing } from "../api/listings";
+import { toast } from "react-toastify";
 
 export const ListingEditPage = () => {
   const { id } = useParams();
@@ -82,11 +83,18 @@ export const ListingEditPage = () => {
     if (!validateForm()) return;
     try {
       console.log("Submitting Clean Data:", formData);
-      await updateListing(id, formData);
-      console.log("Success Updated");
-      navigate(-1);
+      const res = await updateListing(id, formData);
+
+      if (res.success || res.status === "200" || res.status === "201") {
+        toast.success("Listing is Updated Successfully");
+        setTimeout(() => {
+          console.log("Success Updated");
+          navigate(-1);
+        }, 2000);
+      }
     } catch (error) {
       console.log("Frontend Error", error);
+      toast.error("Something went wrong Listing is Not Updated");
     }
   };
 

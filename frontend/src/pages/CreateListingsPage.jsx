@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { createListing } from "../api/listings";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export const CreateListingPage = () => {
   const navigate = useNavigate();
@@ -88,10 +89,17 @@ export const CreateListingPage = () => {
     try {
       const res = await createListing(dataToSend);
       console.log("Form res", res);
-      navigate("/");
-      setSuccess("Success");
+      console.log("res Success", res.success);
+      if (res.success || res.status === 200 || res.status === 201) {
+        toast.success("New Listing is Add Successfully");
+        setSuccess("Success");
+        setTimeout(() => {
+          navigate("/");
+        }, 2000);
+      }
     } catch (error) {
       console.log("Frontend Error", error);
+      toast.error("Something went err Listing is Not Add");
       setError(error.message || "Something went wrong");
     }
   };

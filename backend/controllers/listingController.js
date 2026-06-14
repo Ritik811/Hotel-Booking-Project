@@ -16,9 +16,9 @@ export const createListings = wrapAsync(async (req, res) => {
     req.body;
 
   if (!title || !description || !category || !price || !location || !country) {
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({ message: "Bhai saheb, saari fields bharna zaroori hai!" });
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      message: "Bhai saheb, saari fields bharna zaroori hai!",
+    });
   }
 
   const data = {
@@ -33,9 +33,11 @@ export const createListings = wrapAsync(async (req, res) => {
   const response = await Listing.create(data);
 
   console.log("New Listing Created:", response.title);
-  return res
-    .status(StatusCodes.CREATED)
-    .json({ message: "Data added in Database successfully! 🎉", response });
+  return res.status(StatusCodes.CREATED).json({
+    success: true,
+    message: "Data added in Database successfully! 🎉",
+    response,
+  });
 });
 
 // 3. GET LISTING BY ID
@@ -88,7 +90,7 @@ export const updateListing = wrapAsync(async (req, res) => {
   console.log("Listing Updated:", response.title);
   return res
     .status(StatusCodes.OK)
-    .json({ message: "Update successful", response });
+    .json({ success: true, message: "Update successful", response });
 });
 
 // 5. DELETE LISTING BY ID
@@ -105,5 +107,9 @@ export const deleteListing = wrapAsync(async (req, res) => {
   console.log("Listing Deleted ID:", id);
   return res
     .status(StatusCodes.OK)
-    .json({ message: "Data deleted successfully from DB", response });
+    .json({
+      success: true,
+      message: "Data deleted successfully from DB",
+      response,
+    });
 });

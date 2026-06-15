@@ -105,7 +105,7 @@ export const userLogin = wrapAsync(async (req, res) => {
 });
 
 export const isLogOut = wrapAsync(async (req, res) => {
-  res.cookies(token, "", {
+  res.cookie("token", "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",

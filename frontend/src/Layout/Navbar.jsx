@@ -11,9 +11,31 @@ import {
 import TravelExploreIcon from "@mui/icons-material/TravelExplore"; // Logo Icon
 import SearchIcon from "@mui/icons-material/Search"; // Search Icon
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import { isLogout } from "../api/Auth";
 
 function Navbar() {
   const navigate = useNavigate();
+  const [isLogin, setIsLogin] = useState(true);
+
+  const handleLogout = async () => {
+    try {
+      const res = await isLogout();
+      console.log("res of logout", res);
+      if (res.success) {
+        toast.success(res.message);
+
+        setTimeout(() => {
+          navigate("/login");
+        }, 1500);
+        return;
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to logout. Please try again!");
+    }
+  };
 
   return (
     <AppBar
@@ -152,6 +174,26 @@ function Navbar() {
             onClick={() => navigate("/login")}
           >
             Login
+          </Button>
+
+          <Button
+            variant="contained"
+            sx={{
+              backgroundColor: "green",
+              color: "white",
+              textTransform: "none",
+              fontWeight: "600",
+              borderRadius: "24px",
+              padding: "8px 20px",
+              boxShadow: "none",
+              "&:hover": {
+                backgroundColor: "#DC143C",
+                boxShadow: "none",
+              },
+            }}
+            onClick={handleLogout}
+          >
+            Logout
           </Button>
         </Box>
       </Toolbar>

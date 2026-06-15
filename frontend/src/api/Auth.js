@@ -24,3 +24,13 @@ export const signup = async (formData) => {
     throw error;
   }
 };
+
+export const isLogout = async () => {
+  try {
+    const res = await apiClient.get("logout");
+    console.log("user logout", res.data);
+    return res.data;
+  } catch (error) {
+    throw error;
+  }
+};

@@ -77,6 +77,14 @@ export const userLogin = wrapAsync(async (req, res) => {
       { expiresIn: "7d" },
     );
     console.log("login");
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     return res.status(StatusCodes.OK).json({
       success: true,
       message: "Login SuccessFull",

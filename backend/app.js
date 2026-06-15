@@ -7,6 +7,7 @@ import { listingRouter } from "./routes/listingRoute.js";
 import { INTERNAL_SERVER_ERROR, StatusCodes } from "http-status-codes";
 import { reviewRouter } from "./routes/reviewRoute.js";
 import session from "express-session";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 const app = express();
@@ -32,6 +33,7 @@ app.use(
   }),
 );
 app.use(session(sessionOptions));
+app.use(cookieParser());
 
 const MONGO_URL = process.env.MONGO_URL;
 const databaseConnected = async () => {

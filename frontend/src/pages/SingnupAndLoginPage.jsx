@@ -39,7 +39,7 @@ export const SignUpAndLogin = () => {
 
   const handleClickShowPassword = () => setShowPassword(!showPassword);
 
-  // Inputs ke badlav ko state mein track karne ke liye function
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });

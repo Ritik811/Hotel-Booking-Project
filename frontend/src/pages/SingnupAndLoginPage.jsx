@@ -79,7 +79,7 @@ export const SignUpAndLogin = () => {
         console.log("username: ", username, "password: ", password);
         toast.success("User is Login successfully");
         setLoading(false);
-        setTimeout(() => navigate("/"), 2000);
+        setTimeout(() => navigate(-1), 2000);
       } else {
         // Signup Page
         const res = await signup(formData);

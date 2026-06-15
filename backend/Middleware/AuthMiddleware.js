@@ -8,33 +8,29 @@ export const isLoggedIn = wrapAsync(async (req, res, next) => {
 
   if (!token) {
     return res
-      .status(StatusCodes.UNAUTHORIZED) 
+      .status(StatusCodes.UNAUTHORIZED)
       .json({ success: false, message: "User is not logged in! ⚠️" });
   }
 
-  // Token ko verify 
+  // Token ko verify
   const verifyUser = jwt.verify(token, process.env.JWT_SECRET);
 
   if (!verifyUser) {
-    return res
-      .status(StatusCodes.UNAUTHORIZED)
-      .json({
-        success: false,
-        message: "User is not verified! Invalid token.",
-      });
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      success: false,
+      message: "User is not verified! Invalid token.",
+    });
   }
-
 
   const foundUser = await User.findById(verifyUser.id).select("-password");
   if (!foundUser) {
-    return res
-      .status(StatusCodes.UNAUTHORIZED)
-      .json({
-        success: false,
-        message: "User account does not exist anymore!",
-      });
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      success: false,
+      message: "User account does not exist anymore!",
+    });
   }
 
   req.user = foundUser;
   next();
 });
+

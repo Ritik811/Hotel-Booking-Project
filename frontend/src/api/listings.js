@@ -32,7 +32,7 @@ export const createListing = async (formData) => {
     console.log(res.data);
     return res.data;
   } catch (error) {
-    throw console.log("Error", error.message);
+    throw error;
   }
 };
 
@@ -41,7 +41,7 @@ export const deleteListing = async (id) => {
     const res = await apiClient.delete(`listings/${id}`);
     return res.data;
   } catch (error) {
-    console.log("Api delete Error", error);
+    console.log("Api delete Error", error,error.response);
     throw error;
   }
 };

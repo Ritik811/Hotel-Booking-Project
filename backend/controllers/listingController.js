@@ -29,6 +29,7 @@ export const createListings = wrapAsync(async (req, res) => {
     price,
     location,
     country,
+    owner: req.user._id,
   };
   const response = await Listing.create(data);
 
@@ -105,11 +106,9 @@ export const deleteListing = wrapAsync(async (req, res) => {
   }
 
   console.log("Listing Deleted ID:", id);
-  return res
-    .status(StatusCodes.OK)
-    .json({
-      success: true,
-      message: "Data deleted successfully from DB",
-      response,
-    });
+  return res.status(StatusCodes.OK).json({
+    success: true,
+    message: "Data deleted successfully from DB",
+    response,
+  });
 });

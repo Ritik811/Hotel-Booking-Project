@@ -87,7 +87,9 @@ export const CreateListingPage = () => {
     };
 
     try {
+      console.log("come error 1");
       const res = await createListing(dataToSend);
+      console.log("come error2", res);
       console.log("Form res", res);
       console.log("res Success", res.success);
       if (res.success || res.status === 200 || res.status === 201) {
@@ -96,9 +98,17 @@ export const CreateListingPage = () => {
         setTimeout(() => {
           navigate("/");
         }, 2000);
+        return;
       }
     } catch (error) {
-      console.log("Frontend Error", error);
+      if (error.status === 401) {
+        toast.error(
+          "Oops! You are not logged in. Please Login first to add a listing! 🔒",
+        );
+
+        setTimeout(() => navigate("/login"), 1500);
+        return;
+      }
       toast.error("Something went err Listing is Not Add");
       setError(error.message || "Something went wrong");
     }

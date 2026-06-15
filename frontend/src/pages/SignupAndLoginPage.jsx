@@ -47,6 +47,7 @@ export const SignUpAndLogin = ({ setCurrUser }) => {
   // Form Submit Logic Handler
   const handleSubmit = async (evt) => {
     evt.preventDefault();
+    if (loading) return;
 
     // Validation for login page
     if (isLoginPage) {
@@ -91,9 +92,10 @@ export const SignUpAndLogin = ({ setCurrUser }) => {
         }
 
         console.log(`username ${formData.username}`);
-        toast.success("User is Successfully Register Please Login");
+        toast.success("Welcome! Account created and logged in automatically.");
+        setCurrUser(res?.user || { username: formData.username });
         setLoading(false);
-        setTimeout(() => navigate("/login"), 2000);
+        navigate("/");
       }
     } catch (error) {
       console.log(error);

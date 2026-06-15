@@ -35,16 +35,31 @@ export const userRegister = wrapAsync(async (req, res) => {
 
   console.log("New User Created:", newUser.username);
 
+  let token = jwt.sign(
+    {
+      id: newUser._id,
+      isAdmin: newUser.isAdmin,
+    },
+
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" },
+  );
+
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
+  const userWithoutPassword = newUser.toObject();
+  delete userWithoutPassword.password;
+
   // 4. Success Response
   return res.status(StatusCodes.CREATED).json({
     success: true,
-    message: "User Registered Successfully! 🎉",
-    user: {
-      id: newUser._id,
-      username: newUser.username,
-      email: newUser.email,
-      isAdmin: newUser.isAdmin,
-    },
+    message: "User Registered and Login Successfully! 🎉",
+    user: userWithoutPassword,
   });
 });
 

@@ -15,9 +15,8 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import { isLogout } from "../api/Auth";
 
-function Navbar() {
+function Navbar({ currUser, setCurrUser }) {
   const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(true);
 
   const handleLogout = async () => {
     try {
@@ -25,7 +24,7 @@ function Navbar() {
       console.log("res of logout", res);
       if (res.success) {
         toast.success(res.message);
-
+        setCurrUser(null);
         setTimeout(() => {
           navigate("/login");
         }, 1500);
@@ -156,45 +155,49 @@ function Navbar() {
             Home
           </Button>
 
-          <Button
-            variant="contained"
-            sx={{
-              backgroundColor: "#FF385C",
-              color: "white",
-              textTransform: "none",
-              fontWeight: "600",
-              borderRadius: "24px",
-              padding: "8px 20px",
-              boxShadow: "none",
-              "&:hover": {
-                backgroundColor: "#DC143C",
+          {!currUser && (
+            <Button
+              variant="contained"
+              sx={{
+                backgroundColor: "#FF385C",
+                color: "white",
+                textTransform: "none",
+                fontWeight: "600",
+                borderRadius: "24px",
+                padding: "8px 20px",
                 boxShadow: "none",
-              },
-            }}
-            onClick={() => navigate("/login")}
-          >
-            Login
-          </Button>
+                "&:hover": {
+                  backgroundColor: "#DC143C",
+                  boxShadow: "none",
+                },
+              }}
+              onClick={() => navigate("/login")}
+            >
+              Login
+            </Button>
+          )}
 
-          <Button
-            variant="contained"
-            sx={{
-              backgroundColor: "green",
-              color: "white",
-              textTransform: "none",
-              fontWeight: "600",
-              borderRadius: "24px",
-              padding: "8px 20px",
-              boxShadow: "none",
-              "&:hover": {
-                backgroundColor: "#DC143C",
+          {currUser && (
+            <Button
+              variant="contained"
+              sx={{
+                backgroundColor: "#B91C1C",
+                color: "white",
+                textTransform: "none",
+                fontWeight: "600",
+                borderRadius: "24px",
+                padding: "8px 20px",
                 boxShadow: "none",
-              },
-            }}
-            onClick={handleLogout}
-          >
-            Logout
-          </Button>
+                "&:hover": {
+                  backgroundColor: "#DC143C",
+                  boxShadow: "none",
+                },
+              }}
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
+          )}
         </Box>
       </Toolbar>
     </AppBar>

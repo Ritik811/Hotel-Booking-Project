@@ -22,7 +22,7 @@ import { LoginOutlined } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import { login, signup } from "../api/Auth";
 
-export const SignUpAndLogin = () => {
+export const SignUpAndLogin = ({ setCurrUser }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -39,7 +39,6 @@ export const SignUpAndLogin = () => {
 
   const handleClickShowPassword = () => setShowPassword(!showPassword);
 
-  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -78,8 +77,10 @@ export const SignUpAndLogin = () => {
 
         console.log("username: ", username, "password: ", password);
         toast.success("User is Login successfully");
+        setCurrUser(res.user);
         setLoading(false);
         setTimeout(() => navigate(-1), 2000);
+        return;
       } else {
         // Signup Page
         const res = await signup(formData);

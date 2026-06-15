@@ -4,13 +4,15 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ListingDetailPage } from "./pages/ListingDetailPage";
 import { CreateListingPage } from "./pages/CreateListingsPage";
 import { ListingEditPage } from "./pages/ListingEditPage";
-import { SignUpAndLogin } from "./pages/SingnupAndLoginPage";
+import { SignUpAndLogin } from "./pages/SignupAndLoginPage";
+import { useState } from "react";
 
 const App = () => {
+  const [currUser, setCurrUser] = useState(null);
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <AppLayout />,
+      element: <AppLayout currUser={currUser} setCurrUser={setCurrUser} />,
       children: [
         {
           index: true,
@@ -20,12 +22,15 @@ const App = () => {
           path: "listings/new",
           element: <CreateListingPage />,
         },
-        { path: "signup", element: <SignUpAndLogin /> },
-        { path: "login", element: <SignUpAndLogin /> },
         {
-          path: "listings/login",
-          element: <SignUpAndLogin />,
+          path: "signup",
+          element: <SignUpAndLogin setCurrUser={setCurrUser} />,
         },
+        {
+          path: "login",
+          element: <SignUpAndLogin setCurrUser={setCurrUser} />,
+        },
+
         {
           path: "listings/:id",
           element: <ListingDetailPage />,

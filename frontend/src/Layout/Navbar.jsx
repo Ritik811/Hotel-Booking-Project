@@ -149,6 +149,7 @@ function Navbar() {
                 boxShadow: "none",
               },
             }}
+            onClick={() => navigate("/login")}
           >
             Login
           </Button>

@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ListingDetailPage } from "./pages/ListingDetailPage";
 import { CreateListingPage } from "./pages/CreateListingsPage";
 import { ListingEditPage } from "./pages/ListingEditPage";
+import { SignUpAndLogin } from "./pages/SingnupAndLoginPage";
 
 const App = () => {
   const router = createBrowserRouter([
@@ -19,9 +20,11 @@ const App = () => {
           path: "listings/new",
           element: <CreateListingPage />,
         },
+        { path: "signup", element: <SignUpAndLogin /> },
+        { path: "login", element: <SignUpAndLogin /> },
         {
-          path: "listings/edit/:id",
-          element: <ListingEditPage />,
+          path: "listings/login",
+          element: <SignUpAndLogin />,
         },
         {
           path: "listings/:id",

@@ -86,28 +86,33 @@ export const ListingDetailPage = () => {
     e.preventDefault();
     try {
       if (isEditingReview) {
-        //  EDIT MODE: Yahan tumhaari review update karne wali API aayegi
         const res = await updateReviews(id, editingReviewId, reviewData);
-        console.log(
-          "Review Update Ho Raha Hai:",
-          reviewData,
-          "Id:",
-          editingReviewId,
-        );
-
+        if (res.success) {
+          toast.success("Review is Update Successfully");
+          console.log(
+            "Review Update Ho Raha Hai:",
+            reviewData,
+            "Id:",
+            editingReviewId,
+          );
+        }
         // Form aur states reset
         setIsEditingReview(false);
         setEditingReviewId(null);
       } else {
         //  NORMAL MODE: Naya review create ho rha hai
         const res = await createReviews(id, reviewData);
-        console.log(res);
+        if (res.success) {
+          toast.success("Review is Create Successfully");
+          console.log(res);
+        }
       }
 
       setReviewData({ comment: "", rating: 5 });
       fetchListing();
     } catch (error) {
       console.log(error);
+      toast.error("Somethings went wrong ");
     }
   };
 
@@ -116,6 +121,7 @@ export const ListingDetailPage = () => {
       const res = await deleteReviews(id, reviewId);
       console.log(res);
       if (res) {
+        toast.success("Review is Delete Successfully");
         fetchListing();
       }
     } catch (error) {

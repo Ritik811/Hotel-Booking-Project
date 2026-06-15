@@ -1,4 +1,4 @@
-export const sampleListings = [
+export let sampleListings = [
   {
     title: "Cozy Beachfront Resort",
 

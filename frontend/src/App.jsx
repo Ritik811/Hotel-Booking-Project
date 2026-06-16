@@ -35,6 +35,10 @@ const App = () => {
           path: "listings/:id",
           element: <ListingDetailPage />,
         },
+        {
+          path: "listings/:id/edit/",
+          element: <ListingEditPage />,
+        },
       ],
     },
   ]);

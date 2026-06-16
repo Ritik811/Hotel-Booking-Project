@@ -1,4 +1,6 @@
+import { Listing } from "../Models/Listing.js";
 import { listingValidationSchema } from "../validators/listingValidators.js";
+import { StatusCodes } from "http-status-codes";
 
 export const listingValidate = (req, res, next) => {
   if (req.body.price) {
@@ -29,5 +31,26 @@ export const listingValidate = (req, res, next) => {
   }
 
   req.body = result.data;
+  next();
+};
+
+export const isOwner = async (req, res, next) => {
+  let { id } = req.params;
+
+  let listing = await Listing.findById(id);
+
+  if (!listing) {
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .JSON({ success: false, message: "Listing is Not Found" });
+  }
+
+  if (!listing.owner.equals(req.user.id)) {
+    return res.status(StatusCodes.FORBIDDEN).JSON({
+      success: false,
+      message: "Permission Denied! You are not the owner of this listing. ❌",
+    });
+  }
+
   next();
 };

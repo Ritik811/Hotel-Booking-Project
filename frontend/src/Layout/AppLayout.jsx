@@ -9,7 +9,7 @@ export const AppLayout = ({ currUser, setCurrUser }) => {
     <>
       <Navbar currUser={currUser} setCurrUser={setCurrUser} />
       <ToastContainer position="top-right" autoClose={3000} theme="colored" />
-      <Outlet />
+      <Outlet context={{ currUser, setCurrUser }} />
       <Footer />
     </>
   );

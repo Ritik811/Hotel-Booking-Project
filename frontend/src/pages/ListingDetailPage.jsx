@@ -20,7 +20,7 @@ import TvIcon from "@mui/icons-material/Tv";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { deleteListing, getListingDetails } from "../api/listings";
 import { createReviews, deleteReviews, updateReviews } from "../api/review";
 import { toast } from "react-toastify";
@@ -34,6 +34,8 @@ export const ListingDetailPage = () => {
     comment: "",
     rating: 5,
   });
+
+  const { currUser } = useOutletContext();
 
   const [isEditingReview, setIsEditingReview] = useState(false);
   const [editingReviewId, setEditingReviewId] = useState(null);
@@ -307,39 +309,49 @@ export const ListingDetailPage = () => {
           <Divider sx={{ margin: "24px 0" }} />
 
           {/* Admin Buttons */}
-          <Box sx={{ display: "flex", gap: "16px", marginTop: "24px" }}>
-            <Button
-              variant="outlined"
-              startIcon={<EditIcon />}
-              onClick={() => navigate(`/listings/edit/${id}`)}
-              sx={{
-                borderColor: "#1976d2",
-                color: "#1976d2",
-                textTransform: "none",
-                fontWeight: "600",
-                padding: "8px 24px",
-                borderRadius: "8px",
-              }}
-            >
-              Edit Listing
-            </Button>
 
-            <Button
-              variant="outlined"
-              startIcon={<DeleteIcon />}
-              onClick={handleDeleteButton}
-              sx={{
-                borderColor: "#d32f2f",
-                color: "#d32f2f",
-                textTransform: "none",
-                fontWeight: "600",
-                padding: "8px 24px",
-                borderRadius: "8px",
-              }}
-            >
-              Delete Listing
-            </Button>
-          </Box>
+          {currUser &&
+          listing &&
+          (currUser._id === listing.owner?._id ||
+            listing.owner === currUser._id) ? (
+            <Box sx={{ display: "flex", gap: "16px", marginTop: "24px" }}>
+              <Button
+                variant="outlined"
+                startIcon={<EditIcon />}
+                onClick={() => navigate(`/listings/${listing._id}/edit`)}
+                sx={{
+                  borderColor: "#1976d2",
+                  color: "#1976d2",
+                  textTransform: "none",
+                  fontWeight: "600",
+                  padding: "8px 24px",
+                  borderRadius: "8px",
+                }}
+              >
+                Edit Listing
+              </Button>
+
+              <Button
+                variant="outlined"
+                startIcon={<DeleteIcon />}
+                onClick={handleDeleteButton}
+                sx={{
+                  borderColor: "#d32f2f",
+                  color: "#d32f2f",
+                  textTransform: "none",
+                  fontWeight: "600",
+                  padding: "8px 24px",
+                  borderRadius: "8px",
+                }}
+              >
+                Delete Listing
+              </Button>
+            </Box>
+          ) : (
+            <Typography variant="body2" sx={{ color: "#717171", mt: 2 }}>
+              Hosted by another premium user. ✨
+            </Typography>
+          )}
 
           <Divider sx={{ margin: "32px 0" }} />
 

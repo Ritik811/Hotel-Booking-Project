@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const reviewSchema = new mongoose.Schema(
   {
@@ -9,6 +9,10 @@ const reviewSchema = new mongoose.Schema(
     rating: {
       type: Number,
       required: true,
+    },
+    author: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
     },
   },
   { timestamps: true },

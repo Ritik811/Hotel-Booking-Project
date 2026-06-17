@@ -16,7 +16,17 @@ import { toast } from "react-toastify";
 import { isLogout } from "../api/Auth";
 
 function Navbar({ currUser, setCurrUser }) {
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery && searchQuery.trim()) {
+      navigate(`/?search=${searchQuery}`);
+    } else {
+      navigate("/");
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -73,10 +83,7 @@ function Navbar({ currUser, setCurrUser }) {
         {/* 2. CENTER: Premium Airbnb Style Search Bar */}
         <Paper
           component="form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            console.log("Search logic tum yahan handle krna bhai!");
-          }}
+          onSubmit={handleSearchSubmit}
           sx={{
             display: "flex",
             alignItems: "center",
@@ -97,7 +104,8 @@ function Navbar({ currUser, setCurrUser }) {
             sx={{ ml: 1, flex: 1, fontSize: "14px", fontWeight: "500" }}
             placeholder="Search destinations..."
             inputProps={{ "aria-label": "search destinations" }}
-            onChange={(e) => console.log("Input text: ", e.target.value)} // 🔥 State update tum handle krna
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
           <Box
             type="submit"

@@ -4,7 +4,20 @@ import { wrapAsync } from "../utils/wrapAsync.js";
 
 // 1. GET ALL LISTINGS
 export const getAllListings = wrapAsync(async (req, res) => {
-  const data = await Listing.find({});
+  const { search } = req.query;
+  let query = {};
+
+  if (search && search.trim() !== "") {
+    query = {
+      $or: [
+        { title: { $regex: search, $options: "i" } },
+        { location: { $regex: search, $options: "i" } },
+        { country: { $regex: search, $options: "i" } },
+      ],
+    };
+  }
+
+  const data = await Listing.find(query);
   return res
     .status(StatusCodes.OK)
     .json({ success: true, message: "Data fetched successfully", data });

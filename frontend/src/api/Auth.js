@@ -34,3 +34,13 @@ export const isLogout = async () => {
     throw error;
   }
 };
+
+export const getLoggedInUser = async () => {
+  try {
+    const res = await apiClient.get("me");
+    console.log(res.data);
+    return res.data;
+  } catch (error) {
+    throw error;
+  }
+};

@@ -17,7 +17,7 @@ const initDB = async () => {
 
     const updatedListings = sampleListings.map((obj) => ({
       ...obj,
-      owner: "6a3012d01fbf27424de2a763",
+      owner: "6a325d1f38d25ec71b5a964b",
     }));
 
     await Listing.insertMany(updatedListings);

@@ -91,21 +91,29 @@ export const userLogin = wrapAsync(async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "7d" },
     );
-    console.log("login");
+    console.log("login success");
 
+    // 🍪 Token Cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: false,
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+
+    req.session.user = {
+      _id: userExist._id,
+      username: userExist.username,
+      email: userExist.email,
+      isAdmin: userExist.isAdmin,
+    };
 
     return res.status(StatusCodes.OK).json({
       success: true,
       message: "Login SuccessFull",
       token,
       user: {
-        id: userExist._id,
+        _id: userExist._id,
         username: userExist.username,
         email: userExist.email,
         isAdmin: userExist.isAdmin,
@@ -130,4 +138,37 @@ export const isLogOut = wrapAsync(async (req, res) => {
   return res
     .status(StatusCodes.OK)
     .json({ success: true, message: "User Logout successfully" });
+});
+
+export const getLoggedInUser = wrapAsync(async (req, res) => {
+  const token = req.cookies?.token;
+
+  if (!token) {
+    return res
+      .status(StatusCodes.UNAUTHORIZED)
+      .json({ success: false, message: "No token found, please login" });
+  }
+
+  try {
+    // 2. Token ko verify karo
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // 3. Database se user ka fresh data uthao
+    const user = await User.findById(decoded.id).select("-password"); // Password chhor kar sab le aao
+
+    if (!user) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ success: false, message: "User not found" });
+    }
+
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      user: user,
+    });
+  } catch (error) {
+    return res
+      .status(StatusCodes.UNAUTHORIZED)
+      .json({ success: false, message: "Invalid or expired token" });
+  }
 });

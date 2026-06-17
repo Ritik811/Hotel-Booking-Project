@@ -18,7 +18,7 @@ export const createReviews = wrapAsync(async (req, res) => {
   const reviewResponse = await Review.create({
     comment,
     rating,
-    author: existingData._id,
+    author: req.user._id
   });
   console.log("Review Created with ID:", reviewResponse._id);
 

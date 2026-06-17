@@ -189,7 +189,6 @@ export const ListingDetailPage = () => {
           </Typography>
         </Box>
       </Box>
-
       {/* 🖼️ SECTION 2: Image Banner */}
       <Box
         component="img"
@@ -203,7 +202,6 @@ export const ListingDetailPage = () => {
           marginBottom: "32px",
         }}
       />
-
       {/* 🧱 SECTION 3: Split Layout */}
       <Box
         sx={{
@@ -366,7 +364,6 @@ export const ListingDetailPage = () => {
               backgroundColor: "#fafafa",
             }}
           >
-            {/* 🔥 UI DYNAMIC CHANGE: Heading badlegi mode ke hisab se */}
             <Typography variant="h6" sx={{ fontWeight: "600", mb: 2 }}>
               {isEditingReview ? "Edit Your Review ✏️" : "Leave a Review"}
             </Typography>
@@ -402,7 +399,6 @@ export const ListingDetailPage = () => {
             />
 
             <Box sx={{ display: "flex", gap: 2 }}>
-              {/* 🔥 UI DYNAMIC CHANGE: Color aur Text mode ke hisab se change hoga */}
               <Button
                 type="submit"
                 variant="contained"
@@ -419,7 +415,6 @@ export const ListingDetailPage = () => {
                 {isEditingReview ? "Update Review" : "Submit Review"}
               </Button>
 
-              {/* 🔥 NEW UI ELEMENT: Cancel button jo sirf tab dikhega jab user edit kar raha ho */}
               {isEditingReview && (
                 <Button
                   variant="outlined"
@@ -548,7 +543,8 @@ export const ListingDetailPage = () => {
           </Paper>
         </Box>
       </Box>
-
+      {/* 📜 ALL REVIEWS CARDS GRID */}
+      JavaScript
       {/* 📜 ALL REVIEWS CARDS GRID */}
       <Box sx={{ marginTop: "48px" }}>
         <Divider sx={{ mb: 4 }} />
@@ -571,7 +567,7 @@ export const ListingDetailPage = () => {
         <Grid container spacing={3}>
           {listing.review &&
             listing.review.map((rev) => (
-              <Grid xs={12} sm={6} key={rev._id}>
+              <Grid item xs={12} sm={6} key={rev._id}>
                 <Card
                   variant="outlined"
                   sx={{
@@ -615,35 +611,56 @@ export const ListingDetailPage = () => {
                         </Box>
                       </Box>
 
-                      {/* 🛠️ Action Buttons Container (Edit + Delete) */}
-                      <Box sx={{ display: "flex", gap: 0.5 }}>
-                        {/* ✏️ Edit Icon Button */}
-                        <IconButton
-                          color="primary"
-                          onClick={() => handleEditReview(rev)} // 🔥 Tumhaare is purane function ko call par connect kar diya hai
-                          size="small"
-                          sx={{ color: "#007A87" }}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
+                      {/* 🔥 FINAL STREAMLINED AUTHORIZATION CHECK */}
+                      {currUser &&
+                        rev.author &&
+                        (() => {
+                          // Backend populate hone ke baad rev.author._id ek objectId hoti hai ya string
+                          const reviewAuthorId = rev.author._id
+                            ? rev.author._id.toString()
+                            : rev.author.toString();
 
-                        {/* 🗑️ Delete Icon Button */}
-                        <IconButton
-                          color="error"
-                          onClick={() => handleReviewDelete(rev._id)}
-                          size="small"
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Box>
+                          // Context se jo user aa raha hai uski ID
+                          const loggedInUserId = currUser._id
+                            ? currUser._id.toString()
+                            : currUser.toString();
+
+                          return reviewAuthorId === loggedInUserId;
+                        })() && (
+                          <Box sx={{ display: "flex", gap: 0.5 }}>
+                            {/* ✏️ Edit Icon Button */}
+                            <IconButton
+                              color="primary"
+                              onClick={() => handleEditReview(rev)}
+                              size="small"
+                              sx={{ color: "#007A87" }}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+
+                            {/* 🗑️ Delete Icon Button */}
+                            <IconButton
+                              color="error"
+                              onClick={() => handleReviewDelete(rev._id)}
+                              size="small"
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        )}
                     </Box>
 
-                    <Rating
-                      value={rev.rating || 5}
-                      readOnly
-                      size="small"
-                      sx={{ mb: 1 }}
-                    />
+                    <Paper
+                      elevation={0}
+                      sx={{ backgroundColor: "transparent" }}
+                    >
+                      <Rating
+                        value={rev.rating || 5}
+                        readOnly
+                        size="small"
+                        sx={{ mb: 1 }}
+                      />
+                    </Paper>
 
                     <Typography
                       variant="body2"

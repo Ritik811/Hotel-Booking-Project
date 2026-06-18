@@ -7,6 +7,7 @@ import { ListingEditPage } from "./pages/ListingEditPage";
 import { SignUpAndLogin } from "./pages/SignupAndLoginPage";
 import { useEffect, useState } from "react";
 import { getLoggedInUser } from "./api/Auth";
+import MyBookings from "./pages/MyBooking";
 
 const App = () => {
   const [currUser, setCurrUser] = useState(null);
@@ -52,6 +53,8 @@ const App = () => {
           path: "login",
           element: <SignUpAndLogin setCurrUser={setCurrUser} />,
         },
+
+        { path: "/my-bookings", element: <MyBookings /> },
 
         {
           path: "listings/:id",

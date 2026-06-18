@@ -13,3 +13,13 @@ export const createBookingApi = async (bookingData) => {
     throw error;
   }
 };
+
+export const getUserBookingApi = async () => {
+  try {
+    const res = await apiClient.get("bookings/my-bookings");
+    console.log(res.data);
+    return res.data;
+  } catch (error) {
+    throw error;
+  }
+};

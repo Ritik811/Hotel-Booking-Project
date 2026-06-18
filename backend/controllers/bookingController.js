@@ -48,7 +48,7 @@ export const createBooking = wrapAsync(async (req, res) => {
   });
 });
 
-export const getUserBooking = wrapAsync(async (req, res) => {
+export const getUserBookings = wrapAsync(async (req, res) => {
   const userId = req.user._id;
 
   

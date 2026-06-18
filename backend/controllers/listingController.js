@@ -25,8 +25,7 @@ export const getAllListings = wrapAsync(async (req, res) => {
 
 // 2. CREATE NEW LISTING
 export const createListings = wrapAsync(async (req, res) => {
-  const { title, description, image, category, price, location, country } =
-    req.body;
+  const { title, description, category, price, location, country } = req.body;
 
   if (!title || !description || !category || !price || !location || !country) {
     return res.status(StatusCodes.BAD_REQUEST).json({
@@ -34,10 +33,18 @@ export const createListings = wrapAsync(async (req, res) => {
     });
   }
 
+  if (!req.file) {
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      message: "Bhai saheb, ek sunder si image upload karna zaroori hai!",
+    });
+  }
+
+  const imageUrl = req.file.path;
+
   const data = {
     title,
     description,
-    image,
+    image: [imageUrl],
     category,
     price,
     location,
@@ -60,6 +67,7 @@ export const getListingById = wrapAsync(async (req, res) => {
   const data = await Listing.findById(id)
     .populate({
       path: "review",
+
       populate: {
         path: "author",
       },

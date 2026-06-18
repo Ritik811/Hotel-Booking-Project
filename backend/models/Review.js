@@ -18,4 +18,6 @@ const reviewSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-export const Review = mongoose.model("Review", reviewSchema);
+// ✅ SAFE EXPORT: Yeh check karega ki model pehle se compile toh nahi hai
+export const Review =
+  mongoose.models.Review || mongoose.model("Review", reviewSchema);

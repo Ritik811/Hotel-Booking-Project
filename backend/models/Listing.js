@@ -69,4 +69,5 @@ listingSchema.index({
   description: "text",
 });
 
-export const Listing = mongoose.model("Listing", listingSchema);
+export const Listing =
+  mongoose.models.Listing || mongoose.model("Listing", listingSchema);

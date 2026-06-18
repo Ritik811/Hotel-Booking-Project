@@ -20,6 +20,7 @@ export const CreateListingPage = () => {
   const navigate = useNavigate();
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const [imageFile, setImageFile] = useState(null);
 
   // 🚀 1. Errors State setup kiya frontend feedback ke liye
   const [errors, setErrors] = useState({});
@@ -58,8 +59,10 @@ export const CreateListingPage = () => {
       tempErrors.location = "Location is required!";
     }
 
-    if (!formData.image.trim()) {
-      tempErrors.image = "Image URL is required!";
+    // 🚨 FIXED: Purana text validation hata kar ab imageFile state check kar rahe hain
+    if (!imageFile) {
+      tempErrors.image =
+        "Bhai saheb, ek sunder si property image select karna zaroori hai! 📸";
     }
 
     setErrors(tempErrors);
@@ -74,6 +77,46 @@ export const CreateListingPage = () => {
     });
   };
 
+  // const handleFormSubmit = async (evt) => {
+  //   evt.preventDefault();
+  //   setSuccess("");
+  //   setError("");
+
+  //   if (!validateForm()) return;
+
+  //   const dataToSend = {
+  //     ...formData,
+  //     image: [formData.image],
+  //   };
+
+  //   try {
+  //     console.log("come error 1");
+  //     const res = await createListing(dataToSend);
+  //     console.log("come error2", res);
+  //     console.log("Form res", res);
+  //     console.log("res Success", res.success);
+  //     if (res.success || res.status === 200 || res.status === 201) {
+  //       toast.success("New Listing is Add Successfully");
+  //       setSuccess("Success");
+  //       setTimeout(() => {
+  //         navigate("/");
+  //       }, 2000);
+  //       return;
+  //     }
+  //   } catch (error) {
+  //     if (error.status === 401) {
+  //       toast.error(
+  //         "Oops! You are not logged in. Please Login first to add a listing! 🔒",
+  //       );
+
+  //       setTimeout(() => navigate("/login"), 1500);
+  //       return;
+  //     }
+  //     toast.error("Something went err Listing is Not Add");
+  //     setError(error.message || "Something went wrong");
+  //   }
+  // };
+
   const handleFormSubmit = async (evt) => {
     evt.preventDefault();
     setSuccess("");
@@ -81,19 +124,37 @@ export const CreateListingPage = () => {
 
     if (!validateForm()) return;
 
-    const dataToSend = {
-      ...formData,
-      image: [formData.image],
-    };
+    // 🚨 ASLI KHEL: FormData ka object banao kyuki ab hum file bhej rahe hain
+    const dataToSend = new FormData();
+
+    // 1. Saara purana text data isme append (jodh) do
+    dataToSend.append("title", formData.title);
+    dataToSend.append("description", formData.description);
+    dataToSend.append("category", formData.category);
+    dataToSend.append("price", formData.price);
+    dataToSend.append("location", formData.location);
+    dataToSend.append("country", formData.country);
+
+    // 2. Apni image file ko jodo jo tumne upar alag state (imageFile) mein save ki thi
+    if (imageFile) {
+      dataToSend.append("image", imageFile); // 🔥 Key ka naam "image" hi hona chahiye kyunki backend par upload.single("image") hai
+    } else {
+      toast.error(
+        "Bhai saheb, ek sunder si image upload karna zaroori hai! 📸",
+      );
+      return;
+    }
 
     try {
-      console.log("come error 1");
+      console.log("come error 1 - Sending FormData...");
+
+      // 3. API Call: Pura FormData object bhej rahe hain
       const res = await createListing(dataToSend);
+
       console.log("come error2", res);
-      console.log("Form res", res);
-      console.log("res Success", res.success);
+
       if (res.success || res.status === 200 || res.status === 201) {
-        toast.success("New Listing is Add Successfully");
+        toast.success("New Listing is Added Successfully! 🎉");
         setSuccess("Success");
         setTimeout(() => {
           navigate("/");
@@ -101,15 +162,23 @@ export const CreateListingPage = () => {
         return;
       }
     } catch (error) {
-      if (error.status === 401) {
+      console.error("Form submit error:", error);
+
+      // Axios error response safe handling
+      const statusCode = error.response?.status || error.status;
+
+      if (statusCode === 401) {
         toast.error(
           "Oops! You are not logged in. Please Login first to add a listing! 🔒",
         );
-
         setTimeout(() => navigate("/login"), 1500);
         return;
       }
-      toast.error("Something went err Listing is Not Add");
+
+      const errMsg =
+        error.response?.data?.message ||
+        "Something went err Listing is Not Add";
+      toast.error(errMsg);
       setError(error.message || "Something went wrong");
     }
   };
@@ -214,18 +283,28 @@ export const CreateListingPage = () => {
             <Grid xs={12}>
               <TextField
                 fullWidth
-                label="Image URL"
-                placeholder="https://images.unsplash.com/..."
+                type="file" // 🔥 CHANGE 1: Ab yeh file selector ban gaya
                 variant="outlined"
+                name="image"
+                error={!!errors.image}
                 helperText={
                   errors.image
                     ? errors.image
-                    : "Paste a secure link of your property image"
+                    : "Upload a beautiful image of your property (PNG, JPG, JPEG)"
                 }
-                name="image"
-                value={formData.image} // 🔥 Controlled input structure
-                onChange={handleFormData}
-                error={!!errors.image}
+                // 🔥 CHANGE 2: accept property lagane se user sirf images hi select kar payega
+                slotProps={{
+                  htmlInput: {
+                    accept: "image/*",
+                  },
+                }}
+                // 🔥 CHANGE 3: value hatakar direct file ko state mein capture karenge
+                onChange={(e) => {
+                  const file = e.target.files[0]; // Pehli file uthao
+                  if (file) {
+                    setImageFile(file); // Yeh state hum abhi upar banayenge
+                  }
+                }}
               />
             </Grid>
 

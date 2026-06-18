@@ -8,6 +8,7 @@ import { INTERNAL_SERVER_ERROR, StatusCodes } from "http-status-codes";
 import { reviewRouter } from "./routes/reviewRoute.js";
 import session from "express-session";
 import cookieParser from "cookie-parser";
+import { bookingRoute } from "./routes/bookingRoute.js";
 
 dotenv.config();
 const app = express();
@@ -49,6 +50,7 @@ databaseConnected();
 app.use("/auth", userRouter);
 app.use("/listings", listingRouter);
 app.use("/listings", reviewRouter);
+app.use("/api/bookings", bookingRoute);
 
 app.get("/", (req, res) => {
   res.send("Start Project");

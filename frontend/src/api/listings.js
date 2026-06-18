@@ -29,7 +29,11 @@ export const getListingDetails = async (id) => {
 
 export const createListing = async (formData) => {
   try {
-    const res = await apiClient.post("listings", formData);
+    const res = await apiClient.post("listings", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     console.log(res.data);
     return res.data;
   } catch (error) {

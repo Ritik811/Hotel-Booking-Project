@@ -24,29 +24,32 @@ import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { deleteListing, getListingDetails } from "../api/listings";
 import { createReviews, deleteReviews, updateReviews } from "../api/review";
 import { toast } from "react-toastify";
-import { createBookingApi } from "../api/booking";
+import { checkoutApi, verifyPaymentApi } from "../api/booking"; // 👈 Dono naye payment functions import ho gaye
 
 export const ListingDetailPage = () => {
   const [listing, setListing] = useState({});
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Booking State
+  // Booking States
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [totalPrice, setTotalPrice] = useState(0);
   const [loadingBooking, setLoadingBooking] = useState(false);
 
+  // Review States
   const [reviewData, setReviewData] = useState({
     comment: "",
     rating: 5,
   });
 
-  const { currUser } = useOutletContext();
+  const context = useOutletContext() || {};
+  const currUser = context.currUser || null;
 
   const [isEditingReview, setIsEditingReview] = useState(false);
   const [editingReviewId, setEditingReviewId] = useState(null);
 
+  // Fetch listing details from backend
   const fetchListing = async () => {
     try {
       const res = await getListingDetails(id);
@@ -60,7 +63,7 @@ export const ListingDetailPage = () => {
     if (id) fetchListing();
   }, [id]);
 
-  // Auto Total price calculate
+  // Auto Total price calculation based on date range
   useEffect(() => {
     const basePrice = listing.price || 8499;
     if (checkIn && checkOut) {
@@ -79,7 +82,7 @@ export const ListingDetailPage = () => {
     }
   }, [checkIn, checkOut, listing.price]);
 
-  //  HANDLE SUBMIT BUTTON
+  // 💳 RESERVE NOW / RAZORPAY INTEGRATED BUTTON
   const handleSubmitButton = async () => {
     if (!currUser) {
       toast.error("Please login first to book this listing!");
@@ -98,23 +101,78 @@ export const ListingDetailPage = () => {
 
     try {
       setLoadingBooking(true);
-      const bookingData = {
-        listingId: id,
-        checkIn,
-        checkOut,
-        totalPrice,
+
+      // 1. Backend se Razorpay Order ID generate karwao
+      const orderData = await checkoutApi(totalPrice);
+      if (!orderData.success) {
+        toast.error("Order create karne mein dikkat aayi bhai!");
+        return;
+      }
+
+      // const { order } = orderData;
+      const order = orderData.order || orderData.data || orderData;
+
+      if (!order || !order.id) {
+        toast.error("Backend se Order ID sahi se nahi mili bhai!");
+        console.log("Backend Response Data:", orderData); // Yeh console me dekhna kya aa raha hai
+        return;
+      }
+
+      // 2. Razorpay Pop-up Options config
+      const options = {
+        key: "rzp_test_T386U4a9rxPp6N",
+        amount: order.amount,
+        currency: order.currency,
+        name: "Smart Campus Stay",
+        description: "Hotel Booking Payment",
+        order_id: order.id,
+
+        // Jab user popup me payment success kar dega, tab ye handler hit karega
+        handler: async function (response) {
+          try {
+            const bookingInfo = {
+              listing: id, // 👈 Agar backend Schema me 'listing' likha hai, toh id yahan pass karo
+              checkIn: checkIn,
+              checkOut: checkOut,
+              totalPrice: totalPrice,
+            };
+
+            // 3. Backend par verification signature aur booking payload bhejo
+            const verifyData = await verifyPaymentApi({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              bookingData: bookingInfo,
+            });
+
+            if (verifyData.success) {
+              toast.success(" Booking Confirmed Successfully 🎉");
+              setCheckIn("");
+              setCheckOut("");
+              navigate("/my-bookings");
+            }
+          } catch (error) {
+            console.error("Verification Error:", error);
+            toast.error(
+              error.response?.data?.message || "Verification fail ho gayi!",
+            );
+          }
+        },
+        prefill: {
+          name: currUser?.username || "Guest User",
+          email: currUser?.email || "guest@example.com",
+        },
+        theme: {
+          color: "#FF385C", // Premium theme design matching color
+        },
       };
 
-      const res = await createBookingApi(bookingData);
-      if (res.success) {
-        toast.success("Booking Request Created Successfully! 🎉");
-        setCheckIn("");
-        setCheckOut("");
-        setTimeout(() => navigate("/my-bookings"), 1500);
-      }
+      // 3. Razorpay Popup box browser screen pe render karo
+      const rzp = new window.Razorpay(options);
+      rzp.open();
     } catch (error) {
-      console.error("Booking frontend error:", error);
-      toast.error(error.response?.data?.message || "Booking failed!");
+      console.error("Booking Payment Error:", error);
+      toast.error("Checkout process shuru nahi ho paya!");
     } finally {
       setLoadingBooking(false);
     }
@@ -214,7 +272,7 @@ export const ListingDetailPage = () => {
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Rating
-            value={listing.rating || dummyListing.rating}
+            value={Number(listing.rating || dummyListing.rating)}
             precision={0.05}
             readOnly
             size="small"
@@ -600,6 +658,7 @@ export const ListingDetailPage = () => {
               </Box>
             </Box>
 
+            {/* 🔴 YEH BUTTON DIRECT APNE INLINE INTEGRATED FUNCTION KO HIT KAREGA */}
             <Button
               variant="contained"
               fullWidth

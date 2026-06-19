@@ -29,9 +29,11 @@ export const checkout = wrapAsync(async (req, res) => {
       .json({ success: false, message: "Order is not created Razorpay issue" });
   }
 
-  return res
-    .status(StatusCodes.OK)
-    .json({ success: true, message: "Order is Created" }, order);
+  return res.status(StatusCodes.OK).json({
+    success: true,
+    message: "Order is Created",
+    order: order,
+  });
 });
 
 // 2. PAYMENT VERIFICATION CONTROLLER (Payment Status Confirm karne ke liye)
@@ -40,9 +42,10 @@ export const paymentVerification = wrapAsync(async (req, res) => {
     razorpay_order_id,
     razorpay_payment_id,
     razorpay_signature,
-    bookingData,
+    bookingData, // 👈 Frontend se bheja hua booking payload
   } = req.body;
 
+  // 1. Signature Verification (Ekdam mast chal raha hai tera)
   const body = razorpay_order_id + "|" + razorpay_payment_id;
   const expectedSignature = crypto
     .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
@@ -52,10 +55,22 @@ export const paymentVerification = wrapAsync(async (req, res) => {
   const isAuthentic = expectedSignature === razorpay_signature;
 
   if (isAuthentic) {
+    // 2. bookingData ke andar se saari required fields nikalo
+    const { listing, checkIn, checkOut, totalPrice } = bookingData;
+
+    // 3. New Booking Document banao saari fields ke saath
     const newBooking = new Booking({
       user: req.user._id,
+      listing: listing, // 👈 Ye zaroori fields ab schema ko milengi
+      checkIn: checkIn, // 👈
+      checkOut: checkOut, // 👈
+      totalPrice: totalPrice, // 👈
       status: "Confirmed",
+      paymentId: razorpay_payment_id, // Optional: tracking ke liye save kar lo
+      orderId: razorpay_order_id, // Optional
     });
+
+    // 4. Database me save karo
     await newBooking.save();
 
     return res.status(StatusCodes.CREATED).json({

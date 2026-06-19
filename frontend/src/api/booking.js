@@ -23,3 +23,23 @@ export const getUserBookingApi = async () => {
     throw error;
   }
 };
+
+// 1. Backend se Razorpay Order ID mangwane ke liye
+export const checkoutApi = async (amount) => {
+  try {
+    const res = await apiClient.post("bookings/checkout", { amount });
+    return res.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// 2. Razorpay se payment milne ke baad verification ke liye
+export const verifyPaymentApi = async (paymentData) => {
+  try {
+    const res = await apiClient.post("bookings/verify", paymentData);
+    return res.data;
+  } catch (error) {
+    throw error;
+  }
+};

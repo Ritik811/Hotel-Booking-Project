@@ -47,8 +47,8 @@ export const userRegister = wrapAsync(async (req, res) => {
 
   res.cookie("token", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    secure: true, // Production par cookie sirf HTTPS par chalegi
+    sameSite: "none",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
@@ -96,8 +96,8 @@ export const userLogin = wrapAsync(async (req, res) => {
     // 🍪 Token Cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: true, // Production par cookie sirf HTTPS par chalegi
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -130,8 +130,8 @@ export const userLogin = wrapAsync(async (req, res) => {
 export const isLogOut = wrapAsync(async (req, res) => {
   res.cookie("token", "", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    secure: true, // ✅ True rakho
+    sameSite: "none", // ✅ None rakho taaki cross-origin clear ho sake
     expires: new Date(0),
   });
 

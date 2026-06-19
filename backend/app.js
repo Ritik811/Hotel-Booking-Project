@@ -15,17 +15,17 @@ const app = express();
 
 const sessionOptions = {
   secret: "MySecretIsSuperCode",
-  saveUninitialized: true,
+  saveUninitialized: false, // Production par false rakhna badhiya hai
   resave: false,
   cookie: {
-    secure: false,
+    secure: true, // ✅ Production par HTTPS ke liye true zaroori hai
     httpOnly: true,
-    sameSite: "lax",
-    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    sameSite: "none", // ✅ Cross-origin cookies ke liye sabse zaroori
     maxAge: 7 * 24 * 60 * 60 * 1000,
   },
 };
 
+app.set("trust proxy", 1);
 app.use(express.json());
 app.use(
   cors({

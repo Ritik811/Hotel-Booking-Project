@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { User } from "../Models/User.js";
+import { User } from "../models/User.js";
 import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
 import { wrapAsync } from "../utils/wrapAsync.js";

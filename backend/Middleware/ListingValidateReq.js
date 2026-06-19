@@ -1,4 +1,4 @@
-import { Listing } from "../Models/Listing.js";
+import { Listing } from "../schemas/Listing.js";
 import { listingValidationSchema } from "../validators/listingValidators.js";
 import { StatusCodes } from "http-status-codes";
 

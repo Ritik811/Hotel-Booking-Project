@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
-import { Listing } from "../Models/Listing.js";
-import { Review } from "../Models/Review.js";
+import { Listing } from "../schemas/Listing.js";
+import { Review } from "../schemas/Review.js";
 import { wrapAsync } from "../utils/wrapAsync.js";
 
 export const createReviews = wrapAsync(async (req, res) => {
@@ -18,7 +18,7 @@ export const createReviews = wrapAsync(async (req, res) => {
   const reviewResponse = await Review.create({
     comment,
     rating,
-    author: req.user._id
+    author: req.user._id,
   });
   console.log("Review Created with ID:", reviewResponse._id);
 

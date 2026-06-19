@@ -1,4 +1,4 @@
-import { User } from "../Models/User.js";
+import { User } from "../schemas/User.js";
 import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
 import { wrapAsync } from "../utils/wrapAsync.js";
@@ -33,4 +33,3 @@ export const isLoggedIn = wrapAsync(async (req, res, next) => {
   req.user = foundUser;
   next();
 });
-

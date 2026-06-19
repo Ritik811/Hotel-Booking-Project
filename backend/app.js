@@ -29,7 +29,7 @@ const sessionOptions = {
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://smart-campus-stay.vercel.app",
     credentials: true,
   }),
 );

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { Review } from "./Review.js";
+import { Booking } from "./Booking.js";
 
 const listingSchema = new mongoose.Schema(
   {
@@ -54,11 +55,24 @@ const listingSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
-// Middleware: Jo listing delete hone ke baad auto-trigger hoga
+
 listingSchema.post("findOneAndDelete", async (listing) => {
   if (listing) {
-    await Review.deleteMany({ _id: { $in: listing.review } });
-    console.log("Listing Related Review are Delete");
+    try {
+      if (listing.review && listing.review.length > 0) {
+        await Review.deleteMany({ _id: { $in: listing.review } });
+        console.log("👉 Listing Related Reviews are Deleted");
+      }
+
+      const bookingDeleteResult = await Booking.deleteMany({
+        listing: listing._id,
+      });
+      console.log(
+        `👉 Listing Related Bookings Deleted (Count: ${bookingDeleteResult.deletedCount})`,
+      );
+    } catch (error) {
+      console.error("Error in listing post-delete middleware:", error);
+    }
   }
 });
 

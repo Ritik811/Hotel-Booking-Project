@@ -120,7 +120,7 @@ export const ListingDetailPage = () => {
 
       // 2. Razorpay Pop-up Options config
       const options = {
-        key: "rzp_test_T386U4a9rxPp6N",
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: order.currency,
         name: "Smart Campus Stay",
@@ -227,6 +227,16 @@ export const ListingDetailPage = () => {
       setReviewData({ comment: "", rating: 5 });
       fetchListing();
     } catch (error) {
+      const statusCode = error.status;
+      if (statusCode === 401) {
+        toast.error("Please Login And Review Add");
+        setTimeout(() => navigate("/login"), 1500);
+        return;
+      }
+      if (statusCode === 400) {
+        toast.error("minimum use five character create reviews");
+        return;
+      }
       console.log(error);
       toast.error("Something went wrong");
     }

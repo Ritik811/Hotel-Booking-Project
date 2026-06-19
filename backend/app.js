@@ -29,7 +29,10 @@ const sessionOptions = {
 app.use(express.json());
 app.use(
   cors({
-    origin: "https://smart-campus-stay.vercel.app",
+    origin: [
+      "https://hotel-booking-project-ecru.vercel.app",
+      "http://localhost:5173",
+    ],
     credentials: true,
   }),
 );

@@ -18,7 +18,7 @@ import TitleIcon from "@mui/icons-material/Title";
 import DescriptionIcon from "@mui/icons-material/Description";
 import CategoryIcon from "@mui/icons-material/Category";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
-import ImageIcon from "@mui/icons-material/Image";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PublicIcon from "@mui/icons-material/Public";
 import SaveIcon from "@mui/icons-material/Save";
@@ -31,11 +31,12 @@ export const ListingEditPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
+  const [imagePreview, setImagePreview] = useState(""); // Image preview ke liye state
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    image: "",
+    image: null, // 🔥 Changed from string URL to File object/null
     category: "Hotel",
     price: "",
     location: "",
@@ -78,17 +79,50 @@ export const ListingEditPage = () => {
     });
   };
 
+  // 🔥 Handle File Upload (Image Selection)
+  const handleFileChange = (evt) => {
+    const file = evt.target.files[0];
+    if (file) {
+      setFormData({
+        ...formData,
+        image: file, // State me File Object save hoga
+      });
+      // UI pe preview dikhane ke liye temp URL generation
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = async (evt) => {
     evt.preventDefault();
     if (!validateForm()) return;
-    try {
-      console.log("Submitting Clean Data:", formData);
-      const res = await updateListing(id, formData);
 
-      if (res.success || res.status === "200" || res.status === "201") {
+    try {
+      /* 💡 IMPORTANT NOTE: Agar tum background me Multer use kar rhe ho image save karne ke liye,
+        to data JSON format ki jagah standard 'FormData' format me pass karna hoga. 
+        Maine dono formats ka standard boilerplate layout ready kar diya hai:
+      */
+
+      // OPTION A: standard JSON (Agar image direct Cloudinary backend integration control par binary base64 hai)
+      // const cleanData = formData;
+
+      // OPTION B: Multipart Form Data (Highly Recommended for direct File uploads to Node/Express backend)
+      const dataToSend = new FormData();
+      dataToSend.append("title", formData.title);
+      dataToSend.append("description", formData.description);
+      dataToSend.append("category", formData.category);
+      dataToSend.append("price", formData.price);
+      dataToSend.append("location", formData.location);
+      dataToSend.append("country", formData.country);
+      if (formData.image) {
+        dataToSend.append("image", formData.image); // Append binary/image file directly
+      }
+
+      console.log("Submitting Updated Data...");
+      const res = await updateListing(id, dataToSend); // updates pass directly here
+
+      if (res.success || res.status === 200 || res.status === 201) {
         toast.success("Listing is Updated Successfully");
         setTimeout(() => {
-          console.log("Success Updated");
           navigate(-1);
         }, 2000);
       }
@@ -105,12 +139,17 @@ export const ListingEditPage = () => {
         setFormData({
           title: res.data.title || "",
           description: res.data.description || "",
-          image: res.data.image || "",
+          image: res.data.image || null, // Existing string URL agar backend se aa rha ho
           category: res.data.category || "Hotel",
           price: res.data.price || "",
           location: res.data.location || "",
           country: res.data.country || "",
         });
+
+        // Agar database me pehle se koi online image store hai to uska path/preview state me daal do
+        if (res.data.image) {
+          setImagePreview(res.data.image);
+        }
       } catch (error) {
         console.log("Frontend Error", error);
       }
@@ -120,10 +159,10 @@ export const ListingEditPage = () => {
 
   return (
     <Container maxWidth="md" sx={{ marginTop: "40px", marginBottom: "60px" }}>
-      {/* 🔙 Back Button Design Fixed */}
+      {/* 🔙 Back Button Design */}
       <Button
         startIcon={<ArrowBackIcon />}
-        onClick={() => navigate(-1)} // 🔥 FIX: Functional banaya ise
+        onClick={() => navigate(-1)}
         sx={{
           color: "#717171",
           textTransform: "none",
@@ -157,10 +196,11 @@ export const ListingEditPage = () => {
         </Typography>
 
         {/* Form Container */}
-        <Box component="form" onSubmit={handleSubmit}>
+        <Box component="form" onSubmit={handleSubmit} noValidate>
+          {/* 🔥 Grid layout properties improved for multi-screen sizing */}
           <Grid container spacing={3}>
             {/* 1. Title */}
-            <Grid xs={12}>
+            <Grid item xs={12}>
               <TextField
                 fullWidth
                 label="Property Title"
@@ -187,7 +227,7 @@ export const ListingEditPage = () => {
             </Grid>
 
             {/* 2. Description */}
-            <Grid xs={12}>
+            <Grid item xs={12}>
               <TextField
                 fullWidth
                 multiline
@@ -219,7 +259,7 @@ export const ListingEditPage = () => {
             </Grid>
 
             {/* 3. Category */}
-            <Grid xs={12} sm={6}>
+            <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
                 <InputLabel id="category-label" shrink>
                   Category
@@ -249,7 +289,7 @@ export const ListingEditPage = () => {
             </Grid>
 
             {/* 4. Price per Night */}
-            <Grid xs={12} sm={6}>
+            <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
                 type="number"
@@ -277,34 +317,82 @@ export const ListingEditPage = () => {
               />
             </Grid>
 
-            {/* 5. Image URL */}
-            <Grid xs={12}>
-              <TextField
-                fullWidth
-                label="Image URL"
-                placeholder="https://images.unsplash.com/..."
-                variant="outlined"
-                helperText="Paste a secure link of your property image"
-                name="image"
-                value={formData.image}
-                onChange={handleChange}
-                slotProps={{
-                  inputLabel: { shrink: true },
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <ImageIcon
-                          sx={{ color: "#717171", fontSize: "20px" }}
-                        />
-                      </InputAdornment>
-                    ),
-                  },
+            {/* 🔥 5. Modern File Upload Section instead of standard URL input */}
+            <Grid item xs={12}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "#222222",
+                  fontWeight: "600",
+                  marginBottom: "8px",
                 }}
-              />
+              >
+                Property Image
+              </Typography>
+              <Box
+                sx={{
+                  border: "2px dashed #ccc",
+                  borderRadius: "12px",
+                  padding: "24px",
+                  textAlign: "center",
+                  backgroundColor: "#fafafa",
+                  cursor: "pointer",
+                  transition: "border-color 0.2s ease-in-out",
+                  "&:hover": { borderColor: "#E61E4D" },
+                }}
+                component="label" // Ye box ko clickable label bna dega trigger input call karne ke liye
+              >
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={handleFileChange}
+                />
+                <CloudUploadIcon
+                  sx={{ fontSize: 40, color: "#717171", mb: 1 }}
+                />
+                <Typography
+                  variant="body1"
+                  sx={{ fontWeight: "500", color: "#222" }}
+                >
+                  Click to Upload an Image
+                </Typography>
+                <Typography
+                  variant="caption"
+                  display="block"
+                  sx={{ color: "#717171" }}
+                >
+                  PNG, JPG, JPEG up to 5MB supported
+                </Typography>
+              </Box>
+
+              {/* Real-time Responsive Image Preview rendering box */}
+              {imagePreview && (
+                <Box sx={{ mt: 2, textAlign: "center" }}>
+                  <Typography
+                    variant="caption"
+                    sx={{ display: "block", mb: 1, color: "#717171" }}
+                  >
+                    Selected Image Preview:
+                  </Typography>
+                  <Box
+                    component="img"
+                    src={imagePreview}
+                    alt="Property Preview"
+                    sx={{
+                      maxWidth: "100%",
+                      maxHeight: "200px",
+                      borderRadius: "8px",
+                      objectFit: "cover",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                    }}
+                  />
+                </Box>
+              )}
             </Grid>
 
             {/* 6. Location */}
-            <Grid xs={12} sm={6}>
+            <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
                 label="Location / City"
@@ -313,7 +401,7 @@ export const ListingEditPage = () => {
                 name="location"
                 onChange={handleChange}
                 value={formData.location}
-                error={!!errors.location} // 🔥 FIX: !! dynamic boolean banaya
+                error={!!errors.location}
                 helperText={errors.location}
                 slotProps={{
                   inputLabel: { shrink: true },
@@ -331,7 +419,7 @@ export const ListingEditPage = () => {
             </Grid>
 
             {/* 7. Country */}
-            <Grid xs={12} sm={6}>
+            <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
                 label="Country"
@@ -340,7 +428,7 @@ export const ListingEditPage = () => {
                 name="country"
                 value={formData.country}
                 onChange={handleChange}
-                error={!!errors.country} // 🔥 FIX: !! dynamic boolean banaya
+                error={!!errors.country}
                 helperText={errors.country}
                 slotProps={{
                   inputLabel: { shrink: true },
@@ -358,7 +446,7 @@ export const ListingEditPage = () => {
             </Grid>
 
             {/* ACTION BUTTONS PANEL */}
-            <Grid xs={12} sx={{ marginTop: "24px" }}>
+            <Grid item xs={12} sx={{ marginTop: "24px" }}>
               <Box
                 sx={{
                   display: "flex",

@@ -6,13 +6,15 @@ import {
   TextField,
   Button,
   Paper,
-  Grid,
   MenuItem,
   FormControl,
   InputLabel,
   Select,
   InputAdornment,
 } from "@mui/material";
+// 🔥 FIX: Naye responsive standard ke liye modern Grid2 component use kiya hai
+import Grid from "@mui/material/Grid2";
+
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import TitleIcon from "@mui/icons-material/Title";
 import DescriptionIcon from "@mui/icons-material/Description";
@@ -31,12 +33,12 @@ export const ListingEditPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
-  const [imagePreview, setImagePreview] = useState(""); // Image preview ke liye state
+  const [imagePreview, setImagePreview] = useState("");
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    image: null, // 🔥 Changed from string URL to File object/null
+    image: null,
     category: "Hotel",
     price: "",
     location: "",
@@ -79,15 +81,14 @@ export const ListingEditPage = () => {
     });
   };
 
-  // 🔥 Handle File Upload (Image Selection)
+  // Handle File Upload (Image Selection)
   const handleFileChange = (evt) => {
     const file = evt.target.files[0];
     if (file) {
       setFormData({
         ...formData,
-        image: file, // State me File Object save hoga
+        image: file,
       });
-      // UI pe preview dikhane ke liye temp URL generation
       setImagePreview(URL.createObjectURL(file));
     }
   };
@@ -97,15 +98,6 @@ export const ListingEditPage = () => {
     if (!validateForm()) return;
 
     try {
-      /* 💡 IMPORTANT NOTE: Agar tum background me Multer use kar rhe ho image save karne ke liye,
-        to data JSON format ki jagah standard 'FormData' format me pass karna hoga. 
-        Maine dono formats ka standard boilerplate layout ready kar diya hai:
-      */
-
-      // OPTION A: standard JSON (Agar image direct Cloudinary backend integration control par binary base64 hai)
-      // const cleanData = formData;
-
-      // OPTION B: Multipart Form Data (Highly Recommended for direct File uploads to Node/Express backend)
       const dataToSend = new FormData();
       dataToSend.append("title", formData.title);
       dataToSend.append("description", formData.description);
@@ -114,11 +106,11 @@ export const ListingEditPage = () => {
       dataToSend.append("location", formData.location);
       dataToSend.append("country", formData.country);
       if (formData.image) {
-        dataToSend.append("image", formData.image); // Append binary/image file directly
+        dataToSend.append("image", formData.image);
       }
 
       console.log("Submitting Updated Data...");
-      const res = await updateListing(id, dataToSend); // updates pass directly here
+      const res = await updateListing(id, dataToSend);
 
       if (res.success || res.status === 200 || res.status === 201) {
         toast.success("Listing is Updated Successfully");
@@ -139,14 +131,13 @@ export const ListingEditPage = () => {
         setFormData({
           title: res.data.title || "",
           description: res.data.description || "",
-          image: res.data.image || null, // Existing string URL agar backend se aa rha ho
+          image: res.data.image || null,
           category: res.data.category || "Hotel",
           price: res.data.price || "",
           location: res.data.location || "",
           country: res.data.country || "",
         });
 
-        // Agar database me pehle se koi online image store hai to uska path/preview state me daal do
         if (res.data.image) {
           setImagePreview(res.data.image);
         }
@@ -158,7 +149,14 @@ export const ListingEditPage = () => {
   }, [id]);
 
   return (
-    <Container maxWidth="md" sx={{ marginTop: "40px", marginBottom: "60px" }}>
+    <Container
+      maxWidth="md"
+      sx={{
+        marginTop: { xs: "20px", sm: "40px" },
+        marginBottom: "60px",
+        px: 2,
+      }}
+    >
       {/* 🔙 Back Button Design */}
       <Button
         startIcon={<ArrowBackIcon />}
@@ -176,31 +174,41 @@ export const ListingEditPage = () => {
       <Paper
         elevation={3}
         sx={{
-          padding: { xs: "24px", sm: "40px" },
+          padding: { xs: "20px", sm: "40px" }, // Choti screens par clean fit dene ke liye space optimization
           borderRadius: "16px",
           border: "1px solid #eaeaea",
+          boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.04)",
         }}
       >
         {/* Header Title */}
         <Typography
           variant="h4"
-          sx={{ fontWeight: "600", marginBottom: "8px", color: "#222" }}
+          sx={{
+            fontWeight: "600",
+            marginBottom: "8px",
+            color: "#222",
+            fontSize: { xs: "1.75rem", sm: "2.125rem" }, // Typography scale responsive kari hai
+          }}
         >
           Edit Your Listing ✏️
         </Typography>
         <Typography
           variant="body1"
-          sx={{ color: "#717171", marginBottom: "32px" }}
+          sx={{
+            color: "#717171",
+            marginBottom: "32px",
+            fontSize: { xs: "0.9rem", sm: "1rem" },
+          }}
         >
           Modify the details of your property below to update your listing.
         </Typography>
 
         {/* Form Container */}
         <Box component="form" onSubmit={handleSubmit} noValidate>
-          {/* 🔥 Grid layout properties improved for multi-screen sizing */}
+          {/* 🔥 Grid layout properties updated to modern Grid2 sizing */}
           <Grid container spacing={3}>
             {/* 1. Title */}
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 label="Property Title"
@@ -227,7 +235,7 @@ export const ListingEditPage = () => {
             </Grid>
 
             {/* 2. Description */}
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 multiline
@@ -259,7 +267,7 @@ export const ListingEditPage = () => {
             </Grid>
 
             {/* 3. Category */}
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth>
                 <InputLabel id="category-label" shrink>
                   Category
@@ -289,7 +297,7 @@ export const ListingEditPage = () => {
             </Grid>
 
             {/* 4. Price per Night */}
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 type="number"
@@ -317,8 +325,8 @@ export const ListingEditPage = () => {
               />
             </Grid>
 
-            {/* 🔥 5. Modern File Upload Section instead of standard URL input */}
-            <Grid item xs={12}>
+            {/* 5. Modern File Upload Section */}
+            <Grid size={{ xs: 12 }}>
               <Typography
                 variant="body2"
                 sx={{
@@ -340,7 +348,7 @@ export const ListingEditPage = () => {
                   transition: "border-color 0.2s ease-in-out",
                   "&:hover": { borderColor: "#E61E4D" },
                 }}
-                component="label" // Ye box ko clickable label bna dega trigger input call karne ke liye
+                component="label"
               >
                 <input
                   type="file"
@@ -366,9 +374,17 @@ export const ListingEditPage = () => {
                 </Typography>
               </Box>
 
-              {/* Real-time Responsive Image Preview rendering box */}
+              {/* Real-time Responsive Image Preview box */}
               {imagePreview && (
-                <Box sx={{ mt: 2, textAlign: "center" }}>
+                <Box
+                  sx={{
+                    mt: 2,
+                    textAlign: "center",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
                   <Typography
                     variant="caption"
                     sx={{ display: "block", mb: 1, color: "#717171" }}
@@ -380,11 +396,13 @@ export const ListingEditPage = () => {
                     src={imagePreview}
                     alt="Property Preview"
                     sx={{
-                      maxWidth: "100%",
-                      maxHeight: "200px",
+                      width: "100%", // 🔥 Image layout ko rigid pixels se flexible percentage par transform kiya hai
+                      maxWidth: "350px",
+                      height: "auto",
+                      maxHeight: "220px",
                       borderRadius: "8px",
                       objectFit: "cover",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                     }}
                   />
                 </Box>
@@ -392,7 +410,7 @@ export const ListingEditPage = () => {
             </Grid>
 
             {/* 6. Location */}
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 label="Location / City"
@@ -419,7 +437,7 @@ export const ListingEditPage = () => {
             </Grid>
 
             {/* 7. Country */}
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 label="Country"
@@ -446,13 +464,13 @@ export const ListingEditPage = () => {
             </Grid>
 
             {/* ACTION BUTTONS PANEL */}
-            <Grid item xs={12} sx={{ marginTop: "24px" }}>
+            <Grid size={{ xs: 12 }} sx={{ marginTop: "24px" }}>
               <Box
                 sx={{
                   display: "flex",
                   gap: "16px",
                   justifyContent: "flex-end",
-                  flexDirection: { xs: "column-reverse", sm: "row" },
+                  flexDirection: { xs: "column-reverse", sm: "row" }, // Mobile par vertical stack aur desktop par clean inline row layout
                 }}
               >
                 {/* ❌ Sleek Cancel Button */}
